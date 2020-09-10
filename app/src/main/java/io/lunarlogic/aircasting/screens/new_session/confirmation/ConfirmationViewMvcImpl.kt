@@ -1,5 +1,6 @@
 package io.lunarlogic.aircasting.screens.new_session.confirmation
 
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -68,10 +69,50 @@ abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMv
         val sessionLocation = session!!.location!!
         val location = LatLng(sessionLocation.latitude, sessionLocation.longitude)
         val icon = BitmapHelper.bitmapFromVector(context, R.drawable.ic_dot_20)
-        val marker = MarkerOptions()
-            .position(location)
-            .icon(icon)
-        mMarker = googleMap.addMarker(marker)
+//        val marker = MarkerOptions()
+//            .position(location)
+//            .icon(icon)
+//        mMarker = googleMap.addMarker(marker)
+
+        println("defaultlat: " + sessionLocation.latitude)
+        println("defaultlong: " + sessionLocation.longitude)
+
+        val map: GoogleMap = mMap as GoogleMap
+        var redPoints = mutableListOf<LatLng>()//listOf(LatLng(50.0443026, 19.9612381),LatLng(50.0443027, 19.9612382), LatLng(50.0443028, 19.9612383), LatLng(50.0443028, 19.9612384))
+
+        for (i in 1..30000) {
+            redPoints.add(
+                LatLng(
+                    sessionLocation.latitude + (i * 0.000007),
+                    sessionLocation.longitude
+                )
+            )
+        }
+
+        var options = PolylineOptions()
+            .width(20f)
+            .startCap(RoundCap())
+
+        redPoints.forEachIndexed { index, point ->
+            if(index%2 == 0) {
+                options.addSpan(StyleSpan(Color.BLUE))
+            } else {
+                options.addSpan(StyleSpan(Color.RED))
+            }
+        }
+        map.addPolyline(
+            options
+                .addAll(redPoints)
+
+        )
+//        redPoints.forEachIndexed { index, point ->
+//            map.addPolyline(
+//                options
+//                    .add(point, LatLng(point.latitude + 0.000007, point.longitude))
+//
+//            )
+//        }
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM))
     }
 
@@ -82,7 +123,11 @@ abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMv
     }
 
     private fun buildDescription(): SpannableStringBuilder {
-        val blueColor = ResourcesCompat.getColor(context.resources, R.color.aircasting_blue_400, null)
+        val blueColor = ResourcesCompat.getColor(
+            context.resources,
+            R.color.aircasting_blue_400,
+            null
+        )
 
         return SpannableStringBuilder()
             .append(getString(R.string.session_confirmation_description_part1))
