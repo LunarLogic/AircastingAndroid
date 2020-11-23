@@ -25,12 +25,12 @@ class MobileActiveController(
     SessionsViewMvc.Listener {
 
     init {
-        mSessionsLiveData = loadSessions()
+//        mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mSessionsViewModel.loadMobileActiveSessionsWithMeasurements()
-    }
+//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+//        return mSessionsViewModel.loadMobileActiveSessionsWithMeasurements()
+//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.MOBILE)

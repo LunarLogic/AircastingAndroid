@@ -1,6 +1,7 @@
 package io.lunarlogic.aircasting.database.repositories
 
 import io.lunarlogic.aircasting.database.DatabaseProvider
+import io.lunarlogic.aircasting.database.converters.TagsConverter
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.models.Session
 import java.util.*
@@ -40,7 +41,9 @@ class SessionsRepository {
     }
 
     fun update(session: Session) {
-        mDatabase.sessions().update(session.uuid, session.name, session.tags,
+        // TODO: change when this bug is fixed: https://issuetracker.google.com/issues/173647684
+        // mDatabase.sessions().update(session.uuid, session.name, session.tags, session.endTime!!, session.status)
+        mDatabase.sessions().update(session.uuid, session.name, TagsConverter().tagsToString(session.tags),
             session.endTime!!, session.status)
     }
 

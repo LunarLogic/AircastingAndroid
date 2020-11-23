@@ -114,7 +114,7 @@ class SessionsSyncService {
     }
 
     private fun download(uuids: List<String>) {
-        uuids.forEach { uuid ->
+        uuids.reversed().forEach { uuid ->
             val onDownloadSuccess = { session: Session ->
                 DatabaseProvider.runQuery {
                     val sessionId = sessionRepository.updateOrCreate(session)

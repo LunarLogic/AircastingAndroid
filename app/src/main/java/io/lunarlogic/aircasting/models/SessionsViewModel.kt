@@ -2,42 +2,22 @@ package io.lunarlogic.aircasting.models
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 
 class SessionsViewModel(): ViewModel() {
-    private val CONFIG = PagedList.Config.Builder()
-        .setPageSize(100)
-        .setPrefetchDistance(50)
-        .setEnablePlaceholders(false)
-        .build()
     private val mDatabase = DatabaseProvider.get()
+
+//    val followingSessionsFlow = flowBy(followingSessionsSourceFactory()).liveData.cachedIn(viewModelScope)
+    val mobileActiveSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileActiveSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
+//    val mobileDormantSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileDormantSessionsSourceFactory() }.flow.cachedIn(viewModelScope)
+//    val fixedSessionsFlow = flowBy(fixedSessionsSourceFactory()).flow.cachedIn(viewModelScope)
 
     fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsDBObject?> {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
-    }
-
-    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mDatabase.sessions()
-            .loadFollowingWithMeasurements()
-            .toLiveData(CONFIG)
-    }
-
-    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return loadAllMobileByStatusWithMeasurements(Session.Status.RECORDING)
-    }
-
-    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return loadAllMobileByStatusWithMeasurements(Session.Status.FINISHED)
-    }
-
-    fun loadFixedSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mDatabase.sessions()
-            .loadAllByType(Session.Type.FIXED)
-            .toLiveData(CONFIG)
     }
 
     fun findOrCreateSensorThresholds(session: Session): List<SensorThreshold> {
@@ -88,9 +68,27 @@ class SessionsViewModel(): ViewModel() {
         mDatabase.sessions().updateFollowedAt(session.uuid, session.followedAt)
     }
 
-    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mDatabase.sessions()
-            .loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status)
-            .toLiveData(CONFIG)
+    private fun followingSessionsSourceFactory(): PagingSource<Int, SessionWithStreamsDBObject> {
+        return mDatabase.sessions().loadFollowingWithMeasurements()
+    }
+
+    private fun mobileActiveSessionsSourceFactory(): PagingSource<Int, SessionWithStreamsDBObject> {
+        return mobileSourceFactoryByStatus(Session.Status.RECORDING)
+    }
+
+    private fun mobileDormantSessionsSourceFactory(): PagingSource<Int, SessionWithStreamsDBObject> {
+        return mobileSourceFactoryByStatus(Session.Status.FINISHED)
+    }
+
+    fun fixedSessionsSourceFactory(): PagingSource<Int, SessionWithStreamsDBObject> {
+        return mDatabase.sessions().loadAllByType(Session.Type.FIXED)
+    }
+
+    private fun flowBy(pagingSourceFactory: PagingSource<Int, SessionWithStreamsDBObject>): Pager<Int, SessionWithStreamsDBObject> {
+        return Pager(PagingConfig(pageSize = 10)) { pagingSourceFactory }
+    }
+
+    private fun mobileSourceFactoryByStatus(status: Session.Status): PagingSource<Int, SessionWithStreamsDBObject> {
+        return mDatabase.sessions().loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status)
     }
 }

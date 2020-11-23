@@ -1,7 +1,7 @@
 package io.lunarlogic.aircasting.database.data_classes
 
 import androidx.lifecycle.LiveData
-import androidx.paging.DataSource
+import androidx.paging.PagingSource
 import androidx.room.*
 import io.lunarlogic.aircasting.models.Session
 import java.util.*
@@ -78,13 +78,13 @@ class StreamWithMeasurementsDBObject {
 @Dao
 interface SessionDao {
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type AND status=:status ORDER BY start_time DESC")
-    fun loadAllByTypeAndStatusWithMeasurements(type: Session.Type, status: Session.Status): DataSource.Factory<Int, SessionWithStreamsDBObject>
+    fun loadAllByTypeAndStatusWithMeasurements(type: Session.Type, status: Session.Status): PagingSource<Int, SessionWithStreamsDBObject>
 
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type ORDER BY start_time DESC")
-    fun loadAllByType(type: Session.Type): DataSource.Factory<Int, SessionWithStreamsDBObject>
+    fun loadAllByType(type: Session.Type): PagingSource<Int, SessionWithStreamsDBObject>
 
     @Query("SELECT * FROM sessions WHERE deleted=0 AND followed_at IS NOT NULL ORDER BY followed_at DESC")
-    fun loadFollowingWithMeasurements(): DataSource.Factory<Int, SessionWithStreamsDBObject>
+    fun loadFollowingWithMeasurements(): PagingSource<Int, SessionWithStreamsDBObject>
 
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type ORDER BY start_time DESC")
     fun byType(type: Session.Type): List<SessionDBObject>
@@ -108,7 +108,9 @@ interface SessionDao {
     fun loadSessionByDeviceIdStatusAndType(deviceId: String, status: Session.Status, type: Session.Type): SessionDBObject?
 
     @Query("UPDATE sessions SET name=:name, tags=:tags, end_time=:endTime, status=:status WHERE uuid=:uuid")
-    fun update(uuid: String, name: String, tags: ArrayList<String>, endTime: Date, status: Session.Status)
+    fun update(uuid: String, name: String, tags: String, endTime: Date, status: Session.Status)
+    // TODO: change when this bug is fixed: https://issuetracker.google.com/issues/173647684
+    // fun update(uuid: String, name: String, tags: ArrayList<String>, endTime: Date, status: Session.Status)
 
     @Query("UPDATE sessions SET followed_at=:followedAt WHERE uuid=:uuid")
     fun updateFollowedAt(uuid: String, followedAt: Date?)

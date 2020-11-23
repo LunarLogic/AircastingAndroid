@@ -10,8 +10,8 @@ import io.lunarlogic.aircasting.screens.dashboard.SessionsRecyclerAdapter
 class FixedRecyclerAdapter(
     private val mInflater: LayoutInflater,
     private val mListener: FixedSessionViewMvc.Listener,
-    supportFragmentManager: FragmentManager
-): SessionsRecyclerAdapter<FixedSessionViewMvc.Listener>(mInflater, supportFragmentManager) {
+    private val supportFragmentManager: FragmentManager
+): SessionsRecyclerAdapter<FixedSessionViewMvc.Listener>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val viewMvc =

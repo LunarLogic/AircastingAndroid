@@ -21,12 +21,12 @@ class FollowingController(
     SessionsViewMvc.Listener {
 
     init {
-        mSessionsLiveData = loadSessions()
+//        mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mSessionsViewModel.loadFollowingSessionsWithMeasurements()
-    }
+//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+//        return mSessionsViewModel.loadFollowingSessionsWithMeasurements()
+//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.FIXED)

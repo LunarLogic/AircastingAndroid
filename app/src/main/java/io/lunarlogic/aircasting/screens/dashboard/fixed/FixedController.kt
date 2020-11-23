@@ -23,12 +23,12 @@ class FixedController(
     SessionsViewMvc.Listener {
 
     init {
-        mSessionsLiveData = loadSessions()
+//        mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mSessionsViewModel.loadFixedSessionsWithMeasurements()
-    }
+//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+//        return mSessionsViewModel.loadFixedSessionsWithMeasurements()
+//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.FIXED)

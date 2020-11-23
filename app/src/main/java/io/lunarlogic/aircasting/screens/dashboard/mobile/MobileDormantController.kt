@@ -23,12 +23,12 @@ class MobileDormantController(
     SessionsViewMvc.Listener {
 
     init {
-        mSessionsLiveData = loadSessions()
+//        mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-        return mSessionsViewModel.loadMobileDormantSessionsWithMeasurements()
-    }
+//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+//        return mSessionsViewModel.loadMobileDormantSessionsWithMeasurements()
+//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.MOBILE)

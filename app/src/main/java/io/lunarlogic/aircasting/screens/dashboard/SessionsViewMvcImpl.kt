@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import androidx.paging.PagedList
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -62,8 +63,13 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override fun showSessionsView(dbSessions: PagedList<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
-        mAdapter.bindSessions(dbSessions, sensorThresholds)
+    override suspend fun bindData(data: PagingData<SessionWithStreamsDBObject>) {
+        mAdapter.bindData(data)
+    }
+
+    override fun showSessionsView(sensorThresholds: HashMap<String, SensorThreshold>) {
+//        mAdapter.bindSessions(dbSessions, sensorThresholds)
+//        mAdapter.bindData(dbSessions)
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
     }

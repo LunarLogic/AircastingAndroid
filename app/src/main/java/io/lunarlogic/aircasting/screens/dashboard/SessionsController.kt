@@ -4,7 +4,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagedList
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
@@ -21,6 +24,8 @@ import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
 import io.lunarlogic.aircasting.models.SessionsViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 abstract class SessionsController(
@@ -35,27 +40,34 @@ abstract class SessionsController(
     protected val mMobileSessionsSyncService = SessionsSyncService.get(mApiService, mErrorHandler)
     private val mDownloadMeasurementsService = DownloadMeasurementsService(mApiService, mErrorHandler)
 
-    protected lateinit var mSessionsLiveData: LiveData<PagedList<SessionWithStreamsDBObject>>
+    protected lateinit var mSessionsLiveData: LiveData<PagingData<SessionWithStreamsDBObject>>
     private var mSessions = hashMapOf<String, Session>()
     private var mSensorThresholds = hashMapOf<String, SensorThreshold>()
 
-    private var mSessionsObserver = Observer<PagedList<SessionWithStreamsDBObject>> { dbSessions ->
+    init {
+        mSessionsLiveData = mSessionsViewModel.mobileActiveSessionsFlow
+    }
+
+    private var mSessionsObserver = Observer<PagingData<SessionWithStreamsDBObject>> { dbSessions ->
         DatabaseProvider.runQuery { coroutineScope ->
-            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
-            val sensorThresholds = getSensorThresholds(sessions)
+//            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
+//            val sensorThresholds = getSensorThresholds(sessions)
 
             hideLoader(coroutineScope)
+            coroutineScope
+                .launch { mViewMvc.bindData(dbSessions) }
+                .invokeOnCompletion { showSessionsView(coroutineScope) }
 
-            if (anySessionChanged(sessions) || anySensorThresholdChanged(sensorThresholds)) {
-                if (dbSessions.size > 0) {
-                    updateSensorThresholds(sensorThresholds)
-                    showSessionsView(coroutineScope, dbSessions)
-                } else {
-                    showEmptyView(coroutineScope)
-                }
-
-                updateSessionsCache(sessions)
-            }
+//            if (anySessionChanged(sessions) || anySensorThresholdChanged(sensorThresholds)) {
+//                if (dbSessions.size > 0) {
+//                    updateSensorThresholds(sensorThresholds)
+//                    showSessionsView(coroutineScope, dbSessions)
+//                } else {
+//                    showEmptyView(coroutineScope)
+//                }
+//
+//                updateSessionsCache(sessions)
+//            }
         }
     }
 
@@ -65,9 +77,9 @@ abstract class SessionsController(
         }
     }
 
-    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagedList<SessionWithStreamsDBObject>) {
+    private fun showSessionsView(coroutineScope: CoroutineScope) {
         DatabaseProvider.backToUIThread(coroutineScope) {
-            mViewMvc.showSessionsView(dbSessions, mSensorThresholds)
+            mViewMvc.showSessionsView(mSensorThresholds)
         }
     }
 
@@ -109,10 +121,17 @@ abstract class SessionsController(
         mSessionsLiveData.removeObserver(mSessionsObserver)
     }
 
-    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>>
+//    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>>
 
     fun onCreate() {
         mViewMvc.showLoader()
+
+//        mLifecycleOwner.lifecycleScope.launch {
+//            mSessionsViewModel.mobileDormantSessionsFlow.collectLatest { pagingData ->
+//                mViewMvc.bindData(pagingData)
+//                mViewMvc.hideLoader()
+//            }
+//        }
     }
 
     fun onResume() {
