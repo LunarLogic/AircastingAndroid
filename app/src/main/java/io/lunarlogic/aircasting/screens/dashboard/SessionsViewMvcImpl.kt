@@ -64,8 +64,8 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override suspend fun bindData(data: PagingData<SessionWithStreamsDBObject>) {
-        mAdapter.bindData(data)
+    override suspend fun bindSessions(data: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+        mAdapter.bindSessions(data, sensorThresholds)
     }
 
     override fun showSessionsView(sensorThresholds: HashMap<String, SensorThreshold>) {

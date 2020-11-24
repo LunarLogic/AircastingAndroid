@@ -9,6 +9,7 @@ import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.database.data_classes.StreamWithMeasurementsDBObject
 import io.lunarlogic.aircasting.screens.new_session.NewSessionActivity
 import io.lunarlogic.aircasting.exceptions.ErrorHandler
 import io.lunarlogic.aircasting.lib.NavigationController
@@ -49,12 +50,11 @@ abstract class SessionsController(
     private var mSessionsObserver = Observer<PagingData<SessionWithStreamsDBObject>> { dbSessions ->
         DatabaseProvider.runQuery { coroutineScope ->
 //            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
-//            val sensorThresholds = getSensorThresholds(sessions)
 
             hideLoader(coroutineScope)
             coroutineScope
                 .launch {
-                    mViewMvc.bindData(dbSessions)
+                    mViewMvc.bindSessions(dbSessions, hashMapOf())
                 }
 //                .invokeOnCompletion { showSessionsView(coroutineScope) }
 
@@ -89,10 +89,9 @@ abstract class SessionsController(
         }
     }
 
-    private fun getSensorThresholds(sessions: List<Session>): List<SensorThreshold> {
-        val streams = sessions.flatMap { it.streams }.distinctBy { it.sensorName }
-        return mSessionsViewModel.findOrCreateSensorThresholds(streams)
-    }
+//    private fun getSensorThresholds(sessions: PagingData<SessionWithStreamsDBObject>): List<SensorThreshold> {
+//        return mSessionsViewModel.findOrCreateSensorThresholds(streams)
+//    }
 
     private fun anySensorThresholdChanged(sensorThresholds: List<SensorThreshold>): Boolean {
         return mSensorThresholds.isEmpty() ||

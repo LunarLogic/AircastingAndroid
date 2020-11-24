@@ -5,7 +5,9 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
+import io.lunarlogic.aircasting.screens.dashboard.charts.ChartData
 
 
 class SessionsComparator: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
@@ -24,32 +26,47 @@ class SessionsComparator: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
     }
 }
 
+class SessionPresenterFactory {
+    private var mSessionUUIDS: List<String> = emptyList()
+    private var mSessionPresenters: HashMap<String, SessionPresenter> = hashMapOf()
+
+    fun getOrBuild(dbSession: SessionWithStreamsDBObject): SessionPresenter {
+        val session = Session(dbSession)
+
+        var sessionPresenter: SessionPresenter?
+
+        if (mSessionPresenters.containsKey(session.uuid)) {
+            sessionPresenter = mSessionPresenters[session.uuid]
+            sessionPresenter!!.session = session
+            sessionPresenter!!.chartData = ChartData(session)
+        } else {
+            // TODO: handle thresholds
+            sessionPresenter = SessionPresenter(session, hashMapOf())
+            mSessionPresenters[session.uuid] = sessionPresenter
+        }
+
+        return sessionPresenter
+    }
+}
+
 abstract class SessionsRecyclerAdapter<ListenerType>:
     PagingDataAdapter<SessionWithStreamsDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(SessionsComparator()) {
+    val mSessionPresenterFactory = SessionPresenterFactory()
 
     inner class MyViewHolder(private val mViewMvc: SessionViewMvc<ListenerType>):
         RecyclerView.ViewHolder(mViewMvc.rootView!!) {
         val view: SessionViewMvc<ListenerType> get() = mViewMvc
     }
 
-    private var mSessionUUIDS: List<String> = emptyList()
-    private var mSessionPresenters: HashMap<String, SessionPresenter> = hashMapOf()
-
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val item = getItem(position)
-        val dbSessionWithStreams = item ?: return
-
-//        val sessionPresenter = mSessionPresenters[dbSessionWithStreams.session.uuid]
-        val session = Session(dbSessionWithStreams)
-        val sessionPresenter = SessionPresenter(session, HashMap())
-        sessionPresenter?.let {
-            holder.view.bindSession(sessionPresenter)
-        }
+        val dbSession = getItem(position) ?: return
+        val sessionPresenter = mSessionPresenterFactory.getOrBuild(dbSession)
+        holder.view.bindSession(sessionPresenter)
     }
 
-    suspend fun bindData(data: PagingData<SessionWithStreamsDBObject>) {
-        submitData(data)
+    suspend fun bindSessions(dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+        submitData(dbSessions)
     }
 
 //    private fun removeObsoleteSessions() {
@@ -64,20 +81,7 @@ abstract class SessionsRecyclerAdapter<ListenerType>:
 //        val sessions = dbSessions.map { Session(it) }
 //        mSessionUUIDS = sessions.map { session -> session.uuid }
 //        removeObsoleteSessions()
-//
-//        sessions.forEach { session ->
-//            if (mSessionPresenters.containsKey(session.uuid)) {
-//                val sessionPresenter = mSessionPresenters[session.uuid]
-//                sessionPresenter!!.session = session
-//                sessionPresenter!!.chartData = ChartData(session)
-//            } else {
-//                val sessionPresenter = SessionPresenter(session, sensorThresholds)
-//                mSessionPresenters[session.uuid] = sessionPresenter
-//            }
-//        }
-
-//        notifyDataSetChanged()
-//    }
+// //    }
 
     fun showLoaderFor(session: Session) {
 //        val sessionPresenter = mSessionPresenters[session.uuid]
