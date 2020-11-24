@@ -1,38 +1,31 @@
 package io.lunarlogic.aircasting.screens.dashboard
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.fragment.app.FragmentManager
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
-import io.lunarlogic.aircasting.screens.dashboard.charts.ChartData
-import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
 
 
-class SessiosComparator: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
+class SessionsComparator: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
     override fun areItemsTheSame(
         oldItem: SessionWithStreamsDBObject,
         newItem: SessionWithStreamsDBObject
     ): Boolean {
-        return oldItem.session.id == newItem.session.id
+        return oldItem.session.id == newItem.session.id && oldItem.streams.size == newItem.streams.size
     }
 
     override fun areContentsTheSame(
         oldItem: SessionWithStreamsDBObject,
         newItem: SessionWithStreamsDBObject
     ): Boolean {
-        return oldItem.session == oldItem.session
+        return !Session(newItem).hasChangedFrom(Session(oldItem))
     }
 }
 
 abstract class SessionsRecyclerAdapter<ListenerType>:
-    PagingDataAdapter<SessionWithStreamsDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(SessiosComparator()) {
+    PagingDataAdapter<SessionWithStreamsDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(SessionsComparator()) {
 
     inner class MyViewHolder(private val mViewMvc: SessionViewMvc<ListenerType>):
         RecyclerView.ViewHolder(mViewMvc.rootView!!) {
@@ -44,10 +37,12 @@ abstract class SessionsRecyclerAdapter<ListenerType>:
 
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val dbSessionWithStreams = getItem(position) ?: return
+        val item = getItem(position)
+        val dbSessionWithStreams = item ?: return
 
 //        val sessionPresenter = mSessionPresenters[dbSessionWithStreams.session.uuid]
-        val sessionPresenter = SessionPresenter(Session(dbSessionWithStreams.session), HashMap())
+        val session = Session(dbSessionWithStreams)
+        val sessionPresenter = SessionPresenter(session, HashMap())
         sessionPresenter?.let {
             holder.view.bindSession(sessionPresenter)
         }

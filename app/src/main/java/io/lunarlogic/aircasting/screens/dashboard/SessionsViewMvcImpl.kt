@@ -72,6 +72,7 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
 //        mAdapter.bindData(dbSessions)
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
+//        mAdapter.notifyDataSetChanged()
     }
 
     override fun showEmptyView() {

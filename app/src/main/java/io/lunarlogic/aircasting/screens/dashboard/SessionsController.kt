@@ -5,9 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.PagedList
-import androidx.paging.PagingData
-import androidx.paging.PagingSource
+import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
@@ -55,8 +53,10 @@ abstract class SessionsController(
 
             hideLoader(coroutineScope)
             coroutineScope
-                .launch { mViewMvc.bindData(dbSessions) }
-                .invokeOnCompletion { showSessionsView(coroutineScope) }
+                .launch {
+                    mViewMvc.bindData(dbSessions)
+                }
+//                .invokeOnCompletion { showSessionsView(coroutineScope) }
 
 //            if (anySessionChanged(sessions) || anySensorThresholdChanged(sensorThresholds)) {
 //                if (dbSessions.size > 0) {
@@ -127,7 +127,7 @@ abstract class SessionsController(
         mViewMvc.showLoader()
 
 //        mLifecycleOwner.lifecycleScope.launch {
-//            mSessionsViewModel.mobileDormantSessionsFlow.collectLatest { pagingData ->
+//            mSessionsViewModel.mobileActiveSessionsFlow.collectLatest { pagingData ->
 //                mViewMvc.bindData(pagingData)
 //                mViewMvc.hideLoader()
 //            }

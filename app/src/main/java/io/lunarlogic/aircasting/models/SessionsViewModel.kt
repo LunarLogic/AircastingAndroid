@@ -12,8 +12,8 @@ class SessionsViewModel(): ViewModel() {
     private val mDatabase = DatabaseProvider.get()
 
 //    val followingSessionsFlow = flowBy(followingSessionsSourceFactory()).liveData.cachedIn(viewModelScope)
-    val mobileActiveSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileActiveSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
-//    val mobileDormantSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileDormantSessionsSourceFactory() }.flow.cachedIn(viewModelScope)
+    val mobileActiveSessionsFlow = Pager(PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 50)) { mobileActiveSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
+    val mobileDormantSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileDormantSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
 //    val fixedSessionsFlow = flowBy(fixedSessionsSourceFactory()).flow.cachedIn(viewModelScope)
 
     fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsDBObject?> {
