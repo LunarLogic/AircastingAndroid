@@ -61,7 +61,7 @@ abstract class SessionsController(
 //                } else {
 //                    showEmptyView(coroutineScope)
 //                }
-//
+
 //                updateSessionsCache(sessions)
 //            }
         }
@@ -75,11 +75,8 @@ abstract class SessionsController(
 
     private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagingData<SessionWithStreamsDBObject>) {
         coroutineScope.launch {
-            mViewMvc.bindSessions(dbSessions, mSensorThresholds)
+            mViewMvc.showSessionsView(dbSessions, mSensorThresholds)
         }
-//        DatabaseProvider.backToUIThread(coroutineScope) {
-//            mViewMvc.showSessionsView(mSensorThresholds)
-//        }
     }
 
     private fun showEmptyView(coroutineScope: CoroutineScope) {
@@ -123,13 +120,6 @@ abstract class SessionsController(
 
     fun onCreate() {
         mViewMvc.showLoader()
-
-//        mLifecycleOwner.lifecycleScope.launch {
-//            mSessionsViewModel.mobileActiveSessionsFlow.collectLatest { pagingData ->
-//                mViewMvc.bindData(pagingData)
-//                mViewMvc.hideLoader()
-//            }
-//        }
     }
 
     fun onResume() {

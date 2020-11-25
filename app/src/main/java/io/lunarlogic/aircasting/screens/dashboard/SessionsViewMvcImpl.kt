@@ -64,16 +64,11 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override suspend fun bindSessions(data: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
-        mAdapter.bindSessions(data, sensorThresholds)
-    }
+    override suspend fun showSessionsView(dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+        mAdapter.bindSessions(dbSessions, sensorThresholds)
 
-    override fun showSessionsView(sensorThresholds: HashMap<String, SensorThreshold>) {
-//        mAdapter.bindSessions(dbSessions, sensorThresholds)
-//        mAdapter.bindData(dbSessions)
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
-//        mAdapter.notifyDataSetChanged()
     }
 
     override fun showEmptyView() {
