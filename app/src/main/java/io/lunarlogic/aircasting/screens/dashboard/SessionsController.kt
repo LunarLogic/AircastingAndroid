@@ -50,18 +50,14 @@ abstract class SessionsController(
     private var mSessionsObserver = Observer<PagingData<SessionWithStreamsDBObject>> { dbSessions ->
         DatabaseProvider.runQuery { coroutineScope ->
 //            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
+            val sensorThresholds = getSensorThresholds()
 
             hideLoader(coroutineScope)
-            coroutineScope
-                .launch {
-                    mViewMvc.bindSessions(dbSessions, hashMapOf())
-                }
-//                .invokeOnCompletion { showSessionsView(coroutineScope) }
 
 //            if (anySessionChanged(sessions) || anySensorThresholdChanged(sensorThresholds)) {
 //                if (dbSessions.size > 0) {
-//                    updateSensorThresholds(sensorThresholds)
-//                    showSessionsView(coroutineScope, dbSessions)
+                    updateSensorThresholds(sensorThresholds)
+                    showSessionsView(coroutineScope, dbSessions)
 //                } else {
 //                    showEmptyView(coroutineScope)
 //                }
@@ -77,10 +73,13 @@ abstract class SessionsController(
         }
     }
 
-    private fun showSessionsView(coroutineScope: CoroutineScope) {
-        DatabaseProvider.backToUIThread(coroutineScope) {
-            mViewMvc.showSessionsView(mSensorThresholds)
+    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagingData<SessionWithStreamsDBObject>) {
+        coroutineScope.launch {
+            mViewMvc.bindSessions(dbSessions, mSensorThresholds)
         }
+//        DatabaseProvider.backToUIThread(coroutineScope) {
+//            mViewMvc.showSessionsView(mSensorThresholds)
+//        }
     }
 
     private fun showEmptyView(coroutineScope: CoroutineScope) {
@@ -89,9 +88,9 @@ abstract class SessionsController(
         }
     }
 
-//    private fun getSensorThresholds(sessions: PagingData<SessionWithStreamsDBObject>): List<SensorThreshold> {
-//        return mSessionsViewModel.findOrCreateSensorThresholds(streams)
-//    }
+    private fun getSensorThresholds(): List<SensorThreshold> {
+        return mSessionsViewModel.findOrCreateSensorThresholds()
+    }
 
     private fun anySensorThresholdChanged(sensorThresholds: List<SensorThreshold>): Boolean {
         return mSensorThresholds.isEmpty() ||

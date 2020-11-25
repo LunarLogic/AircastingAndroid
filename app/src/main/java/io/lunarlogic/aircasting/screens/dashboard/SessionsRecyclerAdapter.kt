@@ -29,6 +29,11 @@ class SessionsComparator: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
 class SessionPresenterFactory {
     private var mSessionUUIDS: List<String> = emptyList()
     private var mSessionPresenters: HashMap<String, SessionPresenter> = hashMapOf()
+    private var mSensorThresholds: HashMap<String, SensorThreshold> = hashMapOf()
+
+    fun bindSensorThresholds(sensorThresholds: HashMap<String, SensorThreshold>) {
+        mSensorThresholds = sensorThresholds
+    }
 
     fun getOrBuild(dbSession: SessionWithStreamsDBObject): SessionPresenter {
         val session = Session(dbSession)
@@ -40,8 +45,7 @@ class SessionPresenterFactory {
             sessionPresenter!!.session = session
             sessionPresenter!!.chartData = ChartData(session)
         } else {
-            // TODO: handle thresholds
-            sessionPresenter = SessionPresenter(session, hashMapOf())
+            sessionPresenter = SessionPresenter(session, mSensorThresholds)
             mSessionPresenters[session.uuid] = sessionPresenter
         }
 
@@ -66,6 +70,7 @@ abstract class SessionsRecyclerAdapter<ListenerType>:
     }
 
     suspend fun bindSessions(dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+        mSessionPresenterFactory.bindSensorThresholds(sensorThresholds)
         submitData(dbSessions)
     }
 

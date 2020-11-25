@@ -24,7 +24,12 @@ class SessionsViewModel(): ViewModel() {
         return findOrCreateSensorThresholds(session.streams)
     }
 
-    fun findOrCreateSensorThresholds(streams: List<MeasurementStream>): List<SensorThreshold> {
+    fun findOrCreateSensorThresholds(): List<SensorThreshold> {
+        val streams = mDatabase.measurementStreams().unique().map { MeasurementStream(it) }
+        return findOrCreateSensorThresholds(streams)
+    }
+
+    private fun findOrCreateSensorThresholds(streams: List<MeasurementStream>): List<SensorThreshold> {
         val existingThresholds = findSensorThresholds(streams)
         var newThresholds = createSensorThresholds(streams, existingThresholds)
 

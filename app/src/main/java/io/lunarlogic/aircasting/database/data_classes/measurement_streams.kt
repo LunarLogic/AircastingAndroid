@@ -55,6 +55,9 @@ interface MeasurementStreamDao {
     @Query("SELECT * FROM measurement_streams")
     fun getAll(): List<MeasurementStreamDBObject>
 
+    @Query("SELECT * FROM measurement_streams GROUP BY sensor_name")
+    fun unique(): List<MeasurementStreamDBObject>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(measurementStream: MeasurementStreamDBObject): Long
 
