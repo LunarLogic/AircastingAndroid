@@ -5,6 +5,7 @@ import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.screens.common.ObservableViewMvc
 import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
+import kotlinx.coroutines.CoroutineScope
 
 
 interface SessionsViewMvc : ObservableViewMvc<SessionsViewMvc.Listener> {
@@ -21,8 +22,7 @@ interface SessionsViewMvc : ObservableViewMvc<SessionsViewMvc.Listener> {
         fun onExpandSessionCard(session: Session)
     }
 
-    suspend fun showSessionsView(dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>)
-    fun showEmptyView()
+    fun render(coroutineScope: CoroutineScope, dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>)
     fun showLoaderFor(session: Session)
     fun hideLoaderFor(session: Session)
     fun showLoader()

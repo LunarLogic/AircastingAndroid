@@ -74,6 +74,10 @@ abstract class SessionsRecyclerAdapter<ListenerType>:
         submitData(dbSessions)
     }
 
+    fun sessionsCount(): Int {
+        return itemCount
+    }
+
 //    private fun removeObsoleteSessions() {
 //        mSessionPresenters.keys
 //            .filter { uuid -> !mSessionUUIDS.contains(uuid) }

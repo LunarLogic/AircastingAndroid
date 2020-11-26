@@ -16,6 +16,9 @@ import io.lunarlogic.aircasting.screens.common.BaseObservableViewMvc
 import io.lunarlogic.aircasting.models.MeasurementStream
 import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<SessionsViewMvc.Listener>, SessionsViewMvc {
     private var mRecordSessionButton: Button? = null
@@ -64,14 +67,26 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override suspend fun showSessionsView(dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
-        mAdapter.bindSessions(dbSessions, sensorThresholds)
+    override fun render(coroutineScope: CoroutineScope, dbSessions: PagingData<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+        coroutineScope.launch {
+            mAdapter.bindSessions(dbSessions, sensorThresholds)
 
+            coroutineScope.launch(Dispatchers.Main) {
+                if (mAdapter.sessionsCount() > 0) {
+                    showSessionsList()
+                } else {
+                    showEmptyView()
+                }
+            }
+        }
+    }
+
+    private fun showSessionsList() {
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
     }
 
-    override fun showEmptyView() {
+    private fun showEmptyView() {
         mEmptyView?.visibility = View.VISIBLE
         mRecyclerSessions?.visibility = View.INVISIBLE
     }
