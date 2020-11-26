@@ -38,10 +38,6 @@ abstract class SessionsController(
     private var mSessions = hashMapOf<String, Session>()
     private var mSensorThresholds = hashMapOf<String, SensorThreshold>()
 
-    init {
-        mSessionsLiveData = mSessionsViewModel.mobileActiveSessionsFlow
-    }
-
     private var mSessionsObserver = Observer<PagingData<SessionWithStreamsDBObject>> { dbSessions ->
         DatabaseProvider.runQuery { coroutineScope ->
 //            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
@@ -91,8 +87,6 @@ abstract class SessionsController(
     fun unregisterSessionsObserver() {
         mSessionsLiveData.removeObserver(mSessionsObserver)
     }
-
-//    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>>
 
     fun onCreate() {
         mViewMvc.showLoader()

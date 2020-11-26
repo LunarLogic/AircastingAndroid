@@ -2,9 +2,6 @@ package io.lunarlogic.aircasting.screens.dashboard.following
 
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.paging.PagedList
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.lib.Settings
 import io.lunarlogic.aircasting.screens.dashboard.SessionsController
 import io.lunarlogic.aircasting.models.SessionsViewModel
@@ -21,22 +18,13 @@ class FollowingController(
     SessionsViewMvc.Listener {
 
     init {
-//        mSessionsLiveData = loadSessions()
+        mSessionsLiveData = mSessionsViewModel.followingSessionsLiveData
     }
-
-//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-//        return mSessionsViewModel.loadFollowingSessionsWithMeasurements()
-//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.FIXED)
     }
 
-    override fun onStopSessionClicked(sessionUUID: String) {
-
-    }
-
-    override fun onDeleteSessionClicked(sessionUUID: String) {
-
-    }
+    override fun onStopSessionClicked(sessionUUID: String) {}
+    override fun onDeleteSessionClicked(sessionUUID: String) {}
 }

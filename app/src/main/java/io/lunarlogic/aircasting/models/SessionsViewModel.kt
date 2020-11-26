@@ -10,11 +10,12 @@ import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 
 class SessionsViewModel(): ViewModel() {
     private val mDatabase = DatabaseProvider.get()
+    private val mPagerConfig = PagingConfig(pageSize = 10)
 
-//    val followingSessionsFlow = flowBy(followingSessionsSourceFactory()).liveData.cachedIn(viewModelScope)
-    val mobileActiveSessionsFlow = Pager(PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 50)) { mobileActiveSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
-    val mobileDormantSessionsFlow = Pager(PagingConfig(pageSize = 10)) { mobileDormantSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
-//    val fixedSessionsFlow = flowBy(fixedSessionsSourceFactory()).flow.cachedIn(viewModelScope)
+    val followingSessionsLiveData = Pager(mPagerConfig) { followingSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
+    val mobileActiveSessionsLiveData = Pager(mPagerConfig) { mobileActiveSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
+    val mobileDormantSessionsLiveData = Pager(mPagerConfig) { mobileDormantSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
+    val fixedSessionsLiveData = Pager(mPagerConfig) { fixedSessionsSourceFactory() }.liveData.cachedIn(viewModelScope)
 
     fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsDBObject?> {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
@@ -87,10 +88,6 @@ class SessionsViewModel(): ViewModel() {
 
     fun fixedSessionsSourceFactory(): PagingSource<Int, SessionWithStreamsDBObject> {
         return mDatabase.sessions().loadAllByType(Session.Type.FIXED)
-    }
-
-    private fun flowBy(pagingSourceFactory: PagingSource<Int, SessionWithStreamsDBObject>): Pager<Int, SessionWithStreamsDBObject> {
-        return Pager(PagingConfig(pageSize = 10)) { pagingSourceFactory }
     }
 
     private fun mobileSourceFactoryByStatus(status: Session.Status): PagingSource<Int, SessionWithStreamsDBObject> {

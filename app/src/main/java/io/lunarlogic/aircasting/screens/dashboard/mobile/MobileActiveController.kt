@@ -2,9 +2,6 @@ package io.lunarlogic.aircasting.screens.dashboard.mobile
 
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.paging.PagedList
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.events.StopRecordingEvent
 import io.lunarlogic.aircasting.lib.NavigationController
 import io.lunarlogic.aircasting.lib.Settings
@@ -25,12 +22,8 @@ class MobileActiveController(
     SessionsViewMvc.Listener {
 
     init {
-//        mSessionsLiveData = loadSessions()
+        mSessionsLiveData = mSessionsViewModel.mobileActiveSessionsLiveData
     }
-
-//    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
-//        return mSessionsViewModel.loadMobileActiveSessionsWithMeasurements()
-//    }
 
     override fun onRecordNewSessionClicked() {
         startNewSession(Session.Type.MOBILE)
