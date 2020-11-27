@@ -2,12 +2,32 @@ package io.lunarlogic.aircasting.models
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
+class FooBoundaryCallback : PagedList.BoundaryCallback<SessionDBObject>() {
+    override fun onZeroItemsLoaded() {
+        super.onZeroItemsLoaded()
+        println("ANIA onZeroItemsLoaded")
+    }
+
+    override fun onItemAtEndLoaded(itemAtEnd: SessionDBObject) {
+        super.onItemAtEndLoaded(itemAtEnd)
+        println("ANIA onItemAtEndLoaded")
+    }
+
+    override fun onItemAtFrontLoaded(itemAtFront: SessionDBObject) {
+        super.onItemAtFrontLoaded(itemAtFront)
+        println("ANIA onItemAtFrontLoaded")
+    }
+}
+
+val fooBoundaryCallback = FooBoundaryCallback()
 
 class SessionsViewModel(): ViewModel() {
     private val CONFIG = PagedList.Config.Builder()
@@ -16,30 +36,33 @@ class SessionsViewModel(): ViewModel() {
         .setInitialLoadSizeHint(10)
         .setEnablePlaceholders(false)
         .build()
+
     private val mDatabase = DatabaseProvider.get()
 
     fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsDBObject?> {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
     }
 
-    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        return mDatabase.sessions()
-            .loadFollowingWithMeasurements()
-            .toLiveData(CONFIG)
+    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionDBObject>> {
+        val foo = LivePagedListBuilder(mDatabase.sessions().loadFollowingWithMeasurements(), CONFIG)
+        foo.setBoundaryCallback(fooBoundaryCallback)
+
+        return foo.build()
     }
 
-    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionDBObject>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.RECORDING)
     }
 
-    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionDBObject>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.FINISHED)
     }
 
-    fun loadFixedSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        return mDatabase.sessions()
-            .loadAllShallowByType(Session.Type.FIXED)
-            .toLiveData(CONFIG)
+    fun loadFixedSessions(): LiveData<PagedList<SessionDBObject>> {
+        val foo = LivePagedListBuilder(mDatabase.sessions().loadAllShallowByType(Session.Type.FIXED), CONFIG)
+        foo.setBoundaryCallback(fooBoundaryCallback)
+
+        return foo.build()
     }
 
     fun findOrCreateSensorThresholds(session: Session): List<SensorThreshold> {
@@ -90,9 +113,10 @@ class SessionsViewModel(): ViewModel() {
         mDatabase.sessions().updateFollowedAt(session.uuid, session.followedAt)
     }
 
-    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        return mDatabase.sessions()
-            .loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status)
-            .toLiveData(CONFIG)
+    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionDBObject>> {
+        val foo = LivePagedListBuilder(mDatabase.sessions().loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status), CONFIG)
+        foo.setBoundaryCallback(fooBoundaryCallback)
+
+        return foo.build()
     }
 }

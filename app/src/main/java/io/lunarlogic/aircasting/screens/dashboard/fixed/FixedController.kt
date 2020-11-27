@@ -4,6 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
+import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.events.DeleteSessionEvent
@@ -27,7 +28,7 @@ class FixedController(
         mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    override fun loadSessions(): LiveData<PagedList<SessionDBObject>> {
         return mSessionsViewModel.loadFixedSessions()
     }
 

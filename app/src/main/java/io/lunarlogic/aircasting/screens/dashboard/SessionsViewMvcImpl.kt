@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.lunarlogic.aircasting.R
+import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.screens.common.BaseObservableViewMvc
@@ -63,7 +64,7 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override fun showSessionsView(dbSessions: PagedList<SessionWithStreamsShallowDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+    override fun showSessionsView(dbSessions: PagedList<SessionDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
         mAdapter.bindSessions(dbSessions, sensorThresholds)
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
