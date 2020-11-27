@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.lib.Settings
 import io.lunarlogic.aircasting.screens.dashboard.SessionsController
 import io.lunarlogic.aircasting.models.SessionsViewModel
@@ -24,7 +25,7 @@ class FollowingController(
         mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return mSessionsViewModel.loadFollowingSessionsWithMeasurements()
     }
 

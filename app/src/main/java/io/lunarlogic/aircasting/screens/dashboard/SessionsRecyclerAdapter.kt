@@ -7,22 +7,23 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.screens.dashboard.charts.ChartData
 import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
 
 
-class DiffCallback: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
+class DiffCallback: DiffUtil.ItemCallback<SessionWithStreamsShallowDBObject>() {
     override fun areItemsTheSame(
-        oldItem: SessionWithStreamsDBObject,
-        newItem: SessionWithStreamsDBObject
+        oldItem: SessionWithStreamsShallowDBObject,
+        newItem: SessionWithStreamsShallowDBObject
     ): Boolean {
         return oldItem.session.id == newItem.session.id
     }
 
     override fun areContentsTheSame(
-        oldItem: SessionWithStreamsDBObject,
-        newItem: SessionWithStreamsDBObject
+        oldItem: SessionWithStreamsShallowDBObject,
+        newItem: SessionWithStreamsShallowDBObject
     ): Boolean {
         return oldItem.session == oldItem.session
     }
@@ -32,7 +33,7 @@ class DiffCallback: DiffUtil.ItemCallback<SessionWithStreamsDBObject>() {
 abstract class SessionsRecyclerAdapter<ListenerType>(
     private val mInflater: LayoutInflater,
     protected val supportFragmentManager: FragmentManager
-): PagedListAdapter<SessionWithStreamsDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(DiffCallback()) {
+): PagedListAdapter<SessionWithStreamsShallowDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(DiffCallback()) {
 
     inner class MyViewHolder(private val mViewMvc: SessionViewMvc<ListenerType>) :
         RecyclerView.ViewHolder(mViewMvc.rootView!!) {
@@ -57,7 +58,7 @@ abstract class SessionsRecyclerAdapter<ListenerType>(
             .forEach { uuid -> mSessionPresenters.remove(uuid) }
     }
 
-    fun bindSessions(dbSessions: PagedList<SessionWithStreamsDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+    fun bindSessions(dbSessions: PagedList<SessionWithStreamsShallowDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
         submitList(dbSessions)
 
         val sessions = dbSessions.map { Session(it) }

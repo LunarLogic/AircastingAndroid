@@ -7,11 +7,13 @@ import androidx.paging.toLiveData
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 
 class SessionsViewModel(): ViewModel() {
     private val CONFIG = PagedList.Config.Builder()
-        .setPageSize(100)
-        .setPrefetchDistance(50)
+        .setPageSize(5)
+        .setPrefetchDistance(5)
+        .setInitialLoadSizeHint(10)
         .setEnablePlaceholders(false)
         .build()
     private val mDatabase = DatabaseProvider.get()
@@ -20,23 +22,23 @@ class SessionsViewModel(): ViewModel() {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
     }
 
-    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return mDatabase.sessions()
             .loadFollowingWithMeasurements()
             .toLiveData(CONFIG)
     }
 
-    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.RECORDING)
     }
 
-    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.FINISHED)
     }
 
-    fun loadFixedSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    fun loadFixedSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return mDatabase.sessions()
-            .loadAllByType(Session.Type.FIXED)
+            .loadAllShallowByType(Session.Type.FIXED)
             .toLiveData(CONFIG)
     }
 
@@ -88,7 +90,7 @@ class SessionsViewModel(): ViewModel() {
         mDatabase.sessions().updateFollowedAt(session.uuid, session.followedAt)
     }
 
-    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsDBObject>> {
+    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return mDatabase.sessions()
             .loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status)
             .toLiveData(CONFIG)

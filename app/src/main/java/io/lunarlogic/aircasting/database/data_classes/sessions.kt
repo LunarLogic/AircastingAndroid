@@ -49,7 +49,6 @@ data class SessionDBObject(
             )
 }
 
-
 class SessionWithStreamsDBObject {
     @Embedded
     lateinit var session: SessionDBObject
@@ -60,6 +59,18 @@ class SessionWithStreamsDBObject {
         entity = MeasurementStreamDBObject::class
     )
     lateinit var streams: List<StreamWithMeasurementsDBObject>
+}
+
+class SessionWithStreamsShallowDBObject {
+    @Embedded
+    lateinit var session: SessionDBObject
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "session_id",
+        entity = MeasurementStreamDBObject::class
+    )
+    lateinit var streams: List<MeasurementStreamDBObject>
 }
 
 
@@ -78,13 +89,16 @@ class StreamWithMeasurementsDBObject {
 @Dao
 interface SessionDao {
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type AND status=:status ORDER BY start_time DESC")
-    fun loadAllByTypeAndStatusWithMeasurements(type: Session.Type, status: Session.Status): DataSource.Factory<Int, SessionWithStreamsDBObject>
+    fun loadAllByTypeAndStatusWithMeasurements(type: Session.Type, status: Session.Status): DataSource.Factory<Int, SessionWithStreamsShallowDBObject>
 
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type ORDER BY start_time DESC")
     fun loadAllByType(type: Session.Type): DataSource.Factory<Int, SessionWithStreamsDBObject>
 
+    @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type ORDER BY start_time DESC")
+    fun loadAllShallowByType(type: Session.Type): DataSource.Factory<Int, SessionWithStreamsShallowDBObject>
+
     @Query("SELECT * FROM sessions WHERE deleted=0 AND followed_at IS NOT NULL ORDER BY followed_at DESC")
-    fun loadFollowingWithMeasurements(): DataSource.Factory<Int, SessionWithStreamsDBObject>
+    fun loadFollowingWithMeasurements(): DataSource.Factory<Int, SessionWithStreamsShallowDBObject>
 
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type ORDER BY start_time DESC")
     fun byType(type: Session.Type): List<SessionDBObject>

@@ -8,6 +8,7 @@ import androidx.paging.PagedList
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.screens.new_session.NewSessionActivity
 import io.lunarlogic.aircasting.exceptions.ErrorHandler
 import io.lunarlogic.aircasting.lib.NavigationController
@@ -35,11 +36,11 @@ abstract class SessionsController(
     protected val mMobileSessionsSyncService = SessionsSyncService.get(mApiService, mErrorHandler)
     private val mDownloadMeasurementsService = DownloadMeasurementsService(mApiService, mErrorHandler)
 
-    protected lateinit var mSessionsLiveData: LiveData<PagedList<SessionWithStreamsDBObject>>
+    protected lateinit var mSessionsLiveData: LiveData<PagedList<SessionWithStreamsShallowDBObject>>
     private var mSessions = hashMapOf<String, Session>()
     private var mSensorThresholds = hashMapOf<String, SensorThreshold>()
 
-    private var mSessionsObserver = Observer<PagedList<SessionWithStreamsDBObject>> { dbSessions ->
+    private var mSessionsObserver = Observer<PagedList<SessionWithStreamsShallowDBObject>> { dbSessions ->
         DatabaseProvider.runQuery { coroutineScope ->
             val sessions = dbSessions.map { dbSession -> Session(dbSession) }
             val sensorThresholds = getSensorThresholds(sessions)
@@ -65,7 +66,7 @@ abstract class SessionsController(
         }
     }
 
-    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagedList<SessionWithStreamsDBObject>) {
+    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagedList<SessionWithStreamsShallowDBObject>) {
         DatabaseProvider.backToUIThread(coroutineScope) {
             mViewMvc.showSessionsView(dbSessions, mSensorThresholds)
         }
@@ -109,7 +110,7 @@ abstract class SessionsController(
         mSessionsLiveData.removeObserver(mSessionsObserver)
     }
 
-    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsDBObject>>
+    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>>
 
     fun onCreate() {
         mViewMvc.showLoader()
