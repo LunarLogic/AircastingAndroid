@@ -14,26 +14,26 @@ import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
 
 
-class DiffCallback: DiffUtil.ItemCallback<SessionDBObject>() {
+class DiffCallback: DiffUtil.ItemCallback<SessionWithStreamsShallowDBObject>() {
     override fun areItemsTheSame(
-        oldItem: SessionDBObject,
-        newItem: SessionDBObject
+        oldItem: SessionWithStreamsShallowDBObject,
+        newItem: SessionWithStreamsShallowDBObject
     ): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.session.id == newItem.session.id
     }
 
     override fun areContentsTheSame(
-        oldItem: SessionDBObject,
-        newItem: SessionDBObject
+        oldItem: SessionWithStreamsShallowDBObject,
+        newItem: SessionWithStreamsShallowDBObject
     ): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.session.id == newItem.session.id
     }
 }
 
 abstract class SessionsRecyclerAdapter<ListenerType>(
     private val mInflater: LayoutInflater,
     protected val supportFragmentManager: FragmentManager
-): PagedListAdapter<SessionDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(DiffCallback()) {
+): PagedListAdapter<SessionWithStreamsShallowDBObject, SessionsRecyclerAdapter<ListenerType>.MyViewHolder>(DiffCallback()) {
 
     inner class MyViewHolder(private val mViewMvc: SessionViewMvc<ListenerType>) :
         RecyclerView.ViewHolder(mViewMvc.rootView!!) {
@@ -59,7 +59,7 @@ abstract class SessionsRecyclerAdapter<ListenerType>(
             .forEach { uuid -> mSessionPresenters.remove(uuid) }
     }
 
-    fun bindSessions(dbSessions: PagedList<SessionDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+    fun bindSessions(dbSessions: PagedList<SessionWithStreamsShallowDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
 
 
 //        val sessions = dbSessions.map { Session(it) }

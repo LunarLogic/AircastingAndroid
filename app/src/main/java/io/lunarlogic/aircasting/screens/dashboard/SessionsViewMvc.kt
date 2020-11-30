@@ -23,7 +23,7 @@ interface SessionsViewMvc : ObservableViewMvc<SessionsViewMvc.Listener> {
         fun onExpandSessionCard(session: Session)
     }
 
-    fun showSessionsView(dbSessions: PagedList<SessionDBObject>, sensorThresholds: HashMap<String, SensorThreshold>)
+    fun showSessionsView(dbSessions: PagedList<SessionWithStreamsShallowDBObject>, sensorThresholds: HashMap<String, SensorThreshold>)
     fun showEmptyView()
     fun showLoaderFor(session: Session)
     fun hideLoaderFor(session: Session)

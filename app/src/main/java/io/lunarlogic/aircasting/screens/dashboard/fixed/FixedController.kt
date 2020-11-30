@@ -28,7 +28,7 @@ class FixedController(
         mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionDBObject>> {
+    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
         return mSessionsViewModel.loadFixedSessions()
     }
 

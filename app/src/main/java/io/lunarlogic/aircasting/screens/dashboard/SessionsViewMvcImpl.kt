@@ -64,7 +64,7 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    override fun showSessionsView(dbSessions: PagedList<SessionDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
+    override fun showSessionsView(dbSessions: PagedList<SessionWithStreamsShallowDBObject>, sensorThresholds: HashMap<String, SensorThreshold>) {
         mAdapter.bindSessions(dbSessions, sensorThresholds)
         mRecyclerSessions?.visibility = View.VISIBLE
         mEmptyView?.visibility = View.INVISIBLE
