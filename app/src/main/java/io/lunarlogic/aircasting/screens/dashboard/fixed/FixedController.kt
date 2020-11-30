@@ -13,6 +13,7 @@ import io.lunarlogic.aircasting.screens.dashboard.SessionsController
 import io.lunarlogic.aircasting.models.SessionsViewModel
 import io.lunarlogic.aircasting.screens.dashboard.SessionsViewMvc
 import io.lunarlogic.aircasting.models.Session
+import io.lunarlogic.aircasting.screens.dashboard.SessionPresenter
 import org.greenrobot.eventbus.EventBus
 
 class FixedController(
@@ -28,7 +29,7 @@ class FixedController(
         mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    override fun loadSessions(): LiveData<PagedList<SessionPresenter>> {
         return mSessionsViewModel.loadFixedSessions()
     }
 

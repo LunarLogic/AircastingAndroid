@@ -12,6 +12,7 @@ import io.lunarlogic.aircasting.screens.dashboard.SessionsController
 import io.lunarlogic.aircasting.models.SessionsViewModel
 import io.lunarlogic.aircasting.screens.dashboard.SessionsViewMvc
 import io.lunarlogic.aircasting.models.Session
+import io.lunarlogic.aircasting.screens.dashboard.SessionPresenter
 
 class FollowingController(
     mRootActivity: FragmentActivity?,
@@ -26,7 +27,7 @@ class FollowingController(
         mSessionsLiveData = loadSessions()
     }
 
-    override fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    override fun loadSessions(): LiveData<PagedList<SessionPresenter>> {
         return mSessionsViewModel.loadFollowingSessionsWithMeasurements()
     }
 

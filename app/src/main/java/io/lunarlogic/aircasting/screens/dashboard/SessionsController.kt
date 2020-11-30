@@ -36,21 +36,21 @@ abstract class SessionsController(
     protected val mMobileSessionsSyncService = SessionsSyncService.get(mApiService, mErrorHandler)
     private val mDownloadMeasurementsService = DownloadMeasurementsService(mApiService, mErrorHandler)
 
-    protected lateinit var mSessionsLiveData: LiveData<PagedList<SessionWithStreamsShallowDBObject>>
+    protected lateinit var mSessionsLiveData: LiveData<PagedList<SessionPresenter>>
     private var mSessions = hashMapOf<String, Session>()
     private var mSensorThresholds = hashMapOf<String, SensorThreshold>()
 
-    private var mSessionsObserver = Observer<PagedList<SessionWithStreamsShallowDBObject>> { dbSessions ->
+    private var mSessionsObserver = Observer<PagedList<SessionPresenter>> { sessionPresenters ->
         DatabaseProvider.runQuery { coroutineScope ->
-            val sessions = dbSessions.map { dbSession -> Session(dbSession) }
+            val sessions = sessionPresenters.mapNotNull { presenter -> presenter.session }
             val sensorThresholds = getSensorThresholds(sessions)
 
             hideLoader(coroutineScope)
 
             if (anySessionChanged(sessions) || anySensorThresholdChanged(sensorThresholds)) {
-                if (dbSessions.size > 0) {
+                if (sessionPresenters.size > 0) {
                     updateSensorThresholds(sensorThresholds)
-                    showSessionsView(coroutineScope, dbSessions)
+                    showSessionsView(coroutineScope, sessionPresenters)
                 } else {
                     showEmptyView(coroutineScope)
                 }
@@ -66,7 +66,7 @@ abstract class SessionsController(
         }
     }
 
-    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagedList<SessionWithStreamsShallowDBObject>) {
+    private fun showSessionsView(coroutineScope: CoroutineScope, dbSessions: PagedList<SessionPresenter>) {
         DatabaseProvider.backToUIThread(coroutineScope) {
             mViewMvc.showSessionsView(dbSessions, mSensorThresholds)
         }
@@ -110,7 +110,7 @@ abstract class SessionsController(
         mSessionsLiveData.removeObserver(mSessionsObserver)
     }
 
-    abstract fun loadSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>>
+    abstract fun loadSessions(): LiveData<PagedList<SessionPresenter>>
 
     fun onCreate() {
         mViewMvc.showLoader()

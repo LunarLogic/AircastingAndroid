@@ -9,18 +9,20 @@ import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
-class FooBoundaryCallback : PagedList.BoundaryCallback<SessionWithStreamsShallowDBObject>() {
+import io.lunarlogic.aircasting.screens.dashboard.SessionPresenter
+
+class FooBoundaryCallback : PagedList.BoundaryCallback<SessionPresenter>() {
     override fun onZeroItemsLoaded() {
         super.onZeroItemsLoaded()
         println("ANIA onZeroItemsLoaded")
     }
 
-    override fun onItemAtEndLoaded(itemAtEnd: SessionWithStreamsShallowDBObject) {
+    override fun onItemAtEndLoaded(itemAtEnd: SessionPresenter) {
         super.onItemAtEndLoaded(itemAtEnd)
         println("ANIA onItemAtEndLoaded")
     }
 
-    override fun onItemAtFrontLoaded(itemAtFront: SessionWithStreamsShallowDBObject) {
+    override fun onItemAtFrontLoaded(itemAtFront: SessionPresenter) {
         super.onItemAtFrontLoaded(itemAtFront)
         println("ANIA onItemAtFrontLoaded")
     }
@@ -28,34 +30,36 @@ class FooBoundaryCallback : PagedList.BoundaryCallback<SessionWithStreamsShallow
 
 val fooBoundaryCallback = FooBoundaryCallback()
 
-class SessionsDataSource(): PositionalDataSource<SessionWithStreamsShallowDBObject>() {
+class SessionsDataSource(): PositionalDataSource<SessionPresenter>() {
     override fun loadInitial(
         params: LoadInitialParams,
-        callback: LoadInitialCallback<SessionWithStreamsShallowDBObject>
+        callback: LoadInitialCallback<SessionPresenter>
     ) {
         val limit = params.requestedLoadSize
         println("ANIA loadInitial " + limit + ", " + params.requestedStartPosition)
         val offset = params.requestedStartPosition
-        val items = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val dbItems = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val items = dbItems.map { SessionPresenter(Session(it), hashMapOf()) }
         callback.onResult(items, offset, limit)
     }
 
     override fun loadRange(
         params: LoadRangeParams,
-        callback: LoadRangeCallback<SessionWithStreamsShallowDBObject>
+        callback: LoadRangeCallback<SessionPresenter>
     ) {
         val limit = params.loadSize
         println("ANIA loadRange " + limit + ", " + params.startPosition)
         val offset = params.startPosition
-        val items = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val dbItems = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val items = dbItems.map { SessionPresenter(Session(it), hashMapOf()) }
         callback.onResult(items)
     }
 }
 
-class SessionsDataSourceFactory: DataSource.Factory<Int, SessionWithStreamsShallowDBObject>() {
+class SessionsDataSourceFactory: DataSource.Factory<Int, SessionPresenter>() {
     val sourceLiveData = MutableLiveData<SessionsDataSource>()
     var latestSource: SessionsDataSource = SessionsDataSource()
-    override fun create(): DataSource<Int, SessionWithStreamsShallowDBObject> {
+    override fun create(): DataSource<Int, SessionPresenter> {
         sourceLiveData.postValue(latestSource)
         return latestSource
     }
@@ -77,22 +81,22 @@ class SessionsViewModel(): ViewModel() {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
     }
 
-    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
         val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
         return foo.build()
     }
 
-    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.RECORDING)
     }
 
-    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
         return loadAllMobileByStatusWithMeasurements(Session.Status.FINISHED)
     }
 
-    fun loadFixedSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    fun loadFixedSessions(): LiveData<PagedList<SessionPresenter>> {
         val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
@@ -147,7 +151,7 @@ class SessionsViewModel(): ViewModel() {
         mDatabase.sessions().updateFollowedAt(session.uuid, session.followedAt)
     }
 
-    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
+    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionPresenter>> {
         val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
