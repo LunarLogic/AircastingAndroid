@@ -88,6 +88,9 @@ class StreamWithMeasurementsDBObject {
 
 @Dao
 interface SessionDao {
+    @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type AND status=:status ORDER BY start_time DESC LIMIT :limit OFFSET :offset")
+    fun allByTypeAndStatus(type: Session.Type, status: Session.Status, limit: Int, offset: Int): List<SessionWithStreamsShallowDBObject>
+
     @Query("SELECT * FROM sessions WHERE deleted=0 AND type=:type AND status=:status ORDER BY start_time DESC")
     fun loadAllByTypeAndStatusWithMeasurements(type: Session.Type, status: Session.Status): DataSource.Factory<Int, SessionWithStreamsShallowDBObject>
 

@@ -1,10 +1,9 @@
 package io.lunarlogic.aircasting.models
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
+import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
@@ -29,6 +28,41 @@ class FooBoundaryCallback : PagedList.BoundaryCallback<SessionWithStreamsShallow
 
 val fooBoundaryCallback = FooBoundaryCallback()
 
+class SessionsDataSource(): PositionalDataSource<SessionWithStreamsShallowDBObject>() {
+    override fun loadInitial(
+        params: LoadInitialParams,
+        callback: LoadInitialCallback<SessionWithStreamsShallowDBObject>
+    ) {
+        val limit = params.requestedLoadSize
+        println("ANIA loadInitial " + limit + ", " + params.requestedStartPosition)
+        val offset = params.requestedStartPosition
+        val items = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        callback.onResult(items, offset, limit)
+    }
+
+    override fun loadRange(
+        params: LoadRangeParams,
+        callback: LoadRangeCallback<SessionWithStreamsShallowDBObject>
+    ) {
+        val limit = params.loadSize
+        println("ANIA loadRange " + limit + ", " + params.startPosition)
+        val offset = params.startPosition
+        val items = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        callback.onResult(items)
+    }
+}
+
+class SessionsDataSourceFactory: DataSource.Factory<Int, SessionWithStreamsShallowDBObject>() {
+    val sourceLiveData = MutableLiveData<SessionsDataSource>()
+    var latestSource: SessionsDataSource = SessionsDataSource()
+    override fun create(): DataSource<Int, SessionWithStreamsShallowDBObject> {
+        sourceLiveData.postValue(latestSource)
+        return latestSource
+    }
+}
+
+val datasourceFactory = SessionsDataSourceFactory()
+
 class SessionsViewModel(): ViewModel() {
     private val CONFIG = PagedList.Config.Builder()
         .setPageSize(5)
@@ -44,7 +78,7 @@ class SessionsViewModel(): ViewModel() {
     }
 
     fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        val foo = LivePagedListBuilder(mDatabase.sessions().loadFollowingWithMeasurements(), CONFIG)
+        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
         return foo.build()
@@ -59,7 +93,7 @@ class SessionsViewModel(): ViewModel() {
     }
 
     fun loadFixedSessions(): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        val foo = LivePagedListBuilder(mDatabase.sessions().loadAllShallowByType(Session.Type.FIXED), CONFIG)
+        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
         return foo.build()
@@ -114,7 +148,7 @@ class SessionsViewModel(): ViewModel() {
     }
 
     private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionWithStreamsShallowDBObject>> {
-        val foo = LivePagedListBuilder(mDatabase.sessions().loadAllByTypeAndStatusWithMeasurements(Session.Type.MOBILE, status), CONFIG)
+        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
         foo.setBoundaryCallback(fooBoundaryCallback)
 
         return foo.build()
