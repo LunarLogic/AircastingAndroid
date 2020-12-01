@@ -6,29 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.screens.dashboard.SessionPresenter
-
-class FooBoundaryCallback : PagedList.BoundaryCallback<SessionPresenter>() {
-    override fun onZeroItemsLoaded() {
-        super.onZeroItemsLoaded()
-        println("ANIA onZeroItemsLoaded")
-    }
-
-    override fun onItemAtEndLoaded(itemAtEnd: SessionPresenter) {
-        super.onItemAtEndLoaded(itemAtEnd)
-        println("ANIA onItemAtEndLoaded")
-    }
-
-    override fun onItemAtFrontLoaded(itemAtFront: SessionPresenter) {
-        super.onItemAtFrontLoaded(itemAtFront)
-        println("ANIA onItemAtFrontLoaded")
-    }
-}
-
-val fooBoundaryCallback = FooBoundaryCallback()
 
 class SessionsDataSource(): PositionalDataSource<SessionPresenter>() {
     override fun loadInitial(
@@ -82,10 +61,7 @@ class SessionsViewModel(): ViewModel() {
     }
 
     fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
-        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
-        foo.setBoundaryCallback(fooBoundaryCallback)
-
-        return foo.build()
+        return datasourceFactory.toLiveData(CONFIG)
     }
 
     fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
@@ -97,10 +73,7 @@ class SessionsViewModel(): ViewModel() {
     }
 
     fun loadFixedSessions(): LiveData<PagedList<SessionPresenter>> {
-        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
-        foo.setBoundaryCallback(fooBoundaryCallback)
-
-        return foo.build()
+        return datasourceFactory.toLiveData(CONFIG)
     }
 
     fun findOrCreateSensorThresholds(session: Session): List<SensorThreshold> {
@@ -152,9 +125,6 @@ class SessionsViewModel(): ViewModel() {
     }
 
     private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionPresenter>> {
-        val foo = LivePagedListBuilder(datasourceFactory, CONFIG)
-        foo.setBoundaryCallback(fooBoundaryCallback)
-
-        return foo.build()
+        return datasourceFactory.toLiveData(CONFIG)
     }
 }
