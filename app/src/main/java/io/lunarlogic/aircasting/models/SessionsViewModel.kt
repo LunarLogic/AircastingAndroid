@@ -6,20 +6,54 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.*
 import io.lunarlogic.aircasting.database.DatabaseProvider
 import io.lunarlogic.aircasting.database.data_classes.SensorThresholdDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
+import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
 import io.lunarlogic.aircasting.screens.dashboard.SessionPresenter
+import io.lunarlogic.aircasting.screens.dashboard.SessionsTab
 
-class SessionsDataSource(): PositionalDataSource<SessionPresenter>() {
+class Foo {
+    private val mSessionsDao = DatabaseProvider.get().sessions()
+
+    fun load(tab: SessionsTab, limit: Int, offset: Int): List<SessionWithStreamsDBObject> {
+        return when (tab) {
+            SessionsTab.FOLLOWING -> loadFollowing(limit, offset)
+            SessionsTab.MOBILE_ACTIVE -> loadActive(limit, offset)
+            SessionsTab.MOBILE_DORMANT -> loadDormant(limit, offset)
+            SessionsTab.FIXED -> loadFixed(limit, offset)
+        }
+    }
+
+    private fun loadFollowing(limit: Int, offset: Int): List<SessionWithStreamsDBObject> {
+        return mSessionsDao.loadFollowingWithMeasurements(limit, offset)
+    }
+
+    private fun loadActive(limit: Int, offset: Int): List<SessionWithStreamsDBObject> {
+        return mSessionsDao.loadAllByTypeAndStatusWithMeasurements(
+            Session.Type.MOBILE, Session.Status.RECORDING, limit, offset)
+    }
+
+    private fun loadDormant(limit: Int, offset: Int): List<SessionWithStreamsDBObject> {
+        return mSessionsDao.loadAllByTypeAndStatusWithMeasurements(
+            Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+    }
+
+    private fun loadFixed(limit: Int, offset: Int): List<SessionWithStreamsDBObject> {
+        return mSessionsDao.loadAllByType(Session.Type.FIXED, limit, offset)
+    }
+}
+
+class SessionsDataSource(val tab: SessionsTab): PositionalDataSource<SessionPresenter>() {
+    val foo = Foo()
+
     override fun loadInitial(
         params: LoadInitialParams,
         callback: LoadInitialCallback<SessionPresenter>
     ) {
         val limit = params.requestedLoadSize
-        println("ANIA loadInitial " + limit + ", " + params.requestedStartPosition)
         val offset = params.requestedStartPosition
-        val dbItems = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val dbItems = foo.load(tab, limit, offset)
+        println("ANIA loadInitial " + limit + ", " + params.requestedStartPosition + " " + dbItems.size)
         val items = dbItems.map { SessionPresenter(Session(it), hashMapOf()) }
-        callback.onResult(items, offset, limit)
+        callback.onResult(items, offset)
     }
 
     override fun loadRange(
@@ -29,22 +63,20 @@ class SessionsDataSource(): PositionalDataSource<SessionPresenter>() {
         val limit = params.loadSize
         println("ANIA loadRange " + limit + ", " + params.startPosition)
         val offset = params.startPosition
-        val dbItems = DatabaseProvider.get().sessions().allByTypeAndStatus(Session.Type.MOBILE, Session.Status.FINISHED, limit, offset)
+        val dbItems = foo.load(tab, limit, offset)
         val items = dbItems.map { SessionPresenter(Session(it), hashMapOf()) }
         callback.onResult(items)
     }
 }
 
-class SessionsDataSourceFactory: DataSource.Factory<Int, SessionPresenter>() {
+class SessionsDataSourceFactory(tab: SessionsTab): DataSource.Factory<Int, SessionPresenter>() {
     val sourceLiveData = MutableLiveData<SessionsDataSource>()
-    var latestSource: SessionsDataSource = SessionsDataSource()
+    var latestSource: SessionsDataSource = SessionsDataSource(tab)
     override fun create(): DataSource<Int, SessionPresenter> {
         sourceLiveData.postValue(latestSource)
         return latestSource
     }
 }
-
-val datasourceFactory = SessionsDataSourceFactory()
 
 class SessionsViewModel(): ViewModel() {
     private val CONFIG = PagedList.Config.Builder()
@@ -56,23 +88,27 @@ class SessionsViewModel(): ViewModel() {
 
     private val mDatabase = DatabaseProvider.get()
 
-    fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsShallowDBObject?> {
+    fun loadSessionWithMeasurements(uuid: String): LiveData<SessionWithStreamsDBObject?> {
         return mDatabase.sessions().loadLiveDataSessionAndMeasurementsByUUID(uuid)
     }
 
     fun loadFollowingSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
+        val datasourceFactory = SessionsDataSourceFactory(SessionsTab.FOLLOWING)
         return datasourceFactory.toLiveData(CONFIG)
     }
 
     fun loadMobileActiveSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
-        return loadAllMobileByStatusWithMeasurements(Session.Status.RECORDING)
+        val datasourceFactory = SessionsDataSourceFactory(SessionsTab.MOBILE_ACTIVE)
+        return datasourceFactory.toLiveData(CONFIG)
     }
 
     fun loadMobileDormantSessionsWithMeasurements(): LiveData<PagedList<SessionPresenter>> {
-        return loadAllMobileByStatusWithMeasurements(Session.Status.FINISHED)
+        val datasourceFactory = SessionsDataSourceFactory(SessionsTab.MOBILE_DORMANT)
+        return datasourceFactory.toLiveData(CONFIG)
     }
 
     fun loadFixedSessions(): LiveData<PagedList<SessionPresenter>> {
+        val datasourceFactory = SessionsDataSourceFactory(SessionsTab.FIXED)
         return datasourceFactory.toLiveData(CONFIG)
     }
 
@@ -122,9 +158,5 @@ class SessionsViewModel(): ViewModel() {
 
     fun updateFollowedAt(session: Session) {
         mDatabase.sessions().updateFollowedAt(session.uuid, session.followedAt)
-    }
-
-    private fun loadAllMobileByStatusWithMeasurements(status: Session.Status): LiveData<PagedList<SessionPresenter>> {
-        return datasourceFactory.toLiveData(CONFIG)
     }
 }

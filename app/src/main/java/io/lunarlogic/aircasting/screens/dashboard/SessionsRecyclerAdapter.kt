@@ -6,10 +6,6 @@ import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
-import io.lunarlogic.aircasting.screens.dashboard.charts.ChartData
 import io.lunarlogic.aircasting.models.SensorThreshold
 import io.lunarlogic.aircasting.models.Session
 

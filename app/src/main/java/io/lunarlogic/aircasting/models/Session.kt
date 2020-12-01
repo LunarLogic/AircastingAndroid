@@ -2,7 +2,6 @@ package io.lunarlogic.aircasting.models
 
 import io.lunarlogic.aircasting.database.data_classes.SessionDBObject
 import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsDBObject
-import io.lunarlogic.aircasting.database.data_classes.SessionWithStreamsShallowDBObject
 import io.lunarlogic.aircasting.sensor.microphone.MicrophoneReader
 import java.text.SimpleDateFormat
 import java.util.*
@@ -59,13 +58,6 @@ class Session(
     }
 
     constructor(sessionWithStreamsDBObject: SessionWithStreamsDBObject):
-            this(sessionWithStreamsDBObject.session) {
-        this.mStreams = sessionWithStreamsDBObject.streams.map { streamWithMeasurementsDBObject ->
-            MeasurementStream(streamWithMeasurementsDBObject)
-        }
-    }
-
-    constructor(sessionWithStreamsDBObject: SessionWithStreamsShallowDBObject):
             this(sessionWithStreamsDBObject.session) {
         this.mStreams = sessionWithStreamsDBObject.streams.map { streamWithMeasurementsDBObject ->
             MeasurementStream(streamWithMeasurementsDBObject)
