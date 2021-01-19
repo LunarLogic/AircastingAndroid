@@ -29,8 +29,6 @@ class ForgotPasswordService(
             override fun onResponse(call: Call<ForgotPasswordResponse>, response: Response<ForgotPasswordResponse>) {
                 if (response.isSuccessful){
                     Toast.makeText(mContext, mContext.getString(R.string.reset_email_sent), Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(mContext, mContext.getString(R.string.errors_network_forgot_password), Toast.LENGTH_LONG).show()
                 }
             }
 
