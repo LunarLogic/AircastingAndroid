@@ -23,7 +23,6 @@ import io.lunarlogic.aircasting.lib.Settings
 import io.lunarlogic.aircasting.lib.ShareHelper
 import io.lunarlogic.aircasting.models.MeasurementStream
 import io.lunarlogic.aircasting.screens.session_view.graph.GraphActivity
-import io.lunarlogic.aircasting.screens.session_view.map.MapActivity
 import io.lunarlogic.aircasting.models.Session
 import io.lunarlogic.aircasting.models.SessionsViewModel
 import io.lunarlogic.aircasting.networking.services.*
@@ -91,10 +90,6 @@ abstract class SessionsController(
         DatabaseProvider.runQuery {
             mSessionsViewModel.updateFollowedAt(session)
         }
-    }
-
-    override fun onMapButtonClicked(session: Session, sensorName: String?) {
-        MapActivity.start(mRootActivity, sensorName, session.uuid, session.tab)
     }
 
     override fun onGraphButtonClicked(session: Session, sensorName: String?) {

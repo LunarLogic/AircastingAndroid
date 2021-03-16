@@ -118,8 +118,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
         mHLUSlider.show()
     }
 
-    override fun centerMap(location: Location) {}
-
     private fun bindSessionDetails() {
         val session = mSessionPresenter?.session
         session ?: return

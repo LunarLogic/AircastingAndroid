@@ -11,26 +11,17 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.fragment.app.FragmentManager
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.OnMapReadyCallback
-import com.google.android.libraries.maps.SupportMapFragment
-import com.google.android.libraries.maps.model.*
 import io.lunarlogic.aircasting.R
-import io.lunarlogic.aircasting.lib.BitmapHelper
 import io.lunarlogic.aircasting.screens.common.BaseObservableViewMvc
 import io.lunarlogic.aircasting.models.Session
 
 
-abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMvc.Listener>, ConfirmationViewMvc,
-    OnMapReadyCallback {
+abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMvc.Listener>, ConfirmationViewMvc{
     protected var session: Session? = null
     protected val areMapsDisabled: Boolean
 
     private val DEFAULT_ZOOM = 16f
 
-    private var mMarker: Marker? = null
-    private var mMap: GoogleMap? = null
 
     constructor(
         inflater: LayoutInflater,
@@ -46,7 +37,6 @@ abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMv
         val sessionDescription = rootView?.findViewById<TextView>(R.id.description)
         sessionDescription?.text = buildDescription()
 
-        initMap(supportFragmentManager)
 
         val startRecordingButton = rootView?.findViewById<Button>(R.id.start_recording_button)
         startRecordingButton?.setOnClickListener {
@@ -57,42 +47,7 @@ abstract class ConfirmationViewMvcImpl: BaseObservableViewMvc<ConfirmationViewMv
     abstract fun layoutId(): Int
     abstract fun shouldInitMap(): Boolean
 
-    private fun initMap(supportFragmentManager: FragmentManager?) {
-        if (shouldInitMap()) {
-            val mapFragment =
-                supportFragmentManager?.findFragmentById(R.id.map) as? SupportMapFragment
-            mapFragment?.getMapAsync(this)
-        } else {
-            val instructions = rootView?.findViewById<TextView>(R.id.instructions)
-            instructions?.visibility = View.GONE
 
-            val map = rootView?.findViewById<View>(R.id.map)
-            map?.visibility = View.GONE
-        }
-    }
-
-    protected fun updateMarkerPosition(latitude: Double?, longitude: Double?) {
-        if (latitude == null || longitude == null) return
-
-        val location = LatLng(latitude, longitude)
-        val zoom = mMap?.cameraPosition?.zoom ?: DEFAULT_ZOOM
-        mMarker?.position = location
-        mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
-    }
-
-    override fun onMapReady(googleMap: GoogleMap?) {
-        googleMap ?: return
-        mMap = googleMap
-
-        val sessionLocation = session?.location ?: return
-        val location = LatLng(sessionLocation.latitude, sessionLocation.longitude)
-        val icon = BitmapHelper.bitmapFromVector(context, R.drawable.ic_dot_20)
-        val marker = MarkerOptions()
-            .position(location)
-            .icon(icon)
-        mMarker = googleMap.addMarker(marker)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM))
-    }
 
     private fun onStartRecordingClicked() {
         for (listener in listeners) {

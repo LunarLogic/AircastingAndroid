@@ -40,6 +40,6 @@ class ConfirmationController(
 
     @Subscribe
     fun onMessageEvent(event: LocationChanged) {
-        mViewMvc.updateLocation(event.latitude, event.longitude)
+//        mViewMvc.updateLocation(event.latitude, event.longitude)
     }
 }

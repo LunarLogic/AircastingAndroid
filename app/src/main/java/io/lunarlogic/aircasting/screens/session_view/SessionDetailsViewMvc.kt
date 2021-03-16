@@ -10,7 +10,6 @@ interface SessionDetailsViewMvc: ObservableViewMvc<SessionDetailsViewMvc.Listene
     fun bindSession(sessionPresenter: SessionPresenter?)
 
     fun addMeasurement(measurement: Measurement)
-    fun centerMap(location: Location)
 
     interface Listener: HLUListener {
         fun locateRequested()

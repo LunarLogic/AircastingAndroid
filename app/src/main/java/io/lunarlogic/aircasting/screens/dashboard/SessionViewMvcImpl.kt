@@ -43,7 +43,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
 
     protected var mFollowButton: Button
     protected var mUnfollowButton: Button
-    protected var mMapButton: Button
     private var mGraphButton: Button
     private var mLoader: ImageView?
 
@@ -105,11 +104,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
             onUnfollowButtonClicked()
         }
 
-        mMapButton = findViewById(R.id.map_button)
-        mMapButton.setOnClickListener {
-            onMapButtonClicked()
-        }
-
         mGraphButton = findViewById(R.id.graph_button)
         mGraphButton.setOnClickListener {
             onGraphButtonClicked()
@@ -146,7 +140,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         bindMeasurementsTable()
         bindChartData()
         bindFollowButtons(sessionPresenter)
-        bindMapButton(sessionPresenter)
     }
 
     private fun bindLoader(sessionPresenter: SessionPresenter) {
@@ -203,13 +196,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         mUnfollowButton.visibility = View.GONE
     }
 
-    protected open fun bindMapButton(sessionPresenter: SessionPresenter) {
-        if (sessionPresenter.shouldHideMap) {
-            mMapButton.visibility = View.GONE
-        } else {
-            mMapButton.visibility = View.VISIBLE
-        }
-    }
 
     protected open fun expandSessionCard() {
         setExpandCollapseButton()
@@ -225,7 +211,7 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
 
         adjustSessionCardPadding()
 
-        expandButtonsHitAreas(listOf(mGraphButton, mMapButton, mUnfollowButton, mFollowButton), mExpandedSessionView)
+        expandButtonsHitAreas(listOf(mGraphButton, mUnfollowButton, mFollowButton), mExpandedSessionView)
     }
 
     protected open fun collapseSessionCard() {
@@ -288,17 +274,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
             
             for (listener in listeners) {
                 (listener as? SessionCardListener)?.onUnfollowButtonClicked(session)
-            }
-        }
-    }
-
-    private fun onMapButtonClicked() {
-        mSessionPresenter?.session?.let {
-            for (listener in listeners) {
-                (listener as? SessionCardListener)?.onMapButtonClicked(
-                    it,
-                    mSessionPresenter?.selectedStream
-                )
             }
         }
     }

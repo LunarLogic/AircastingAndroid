@@ -26,7 +26,4 @@ class MobileSessionConfirmationViewMvcImpl(
         return !areMapsDisabled
     }
 
-    override fun updateLocation(latitude: Double?, longitude: Double?) {
-        updateMarkerPosition(latitude, longitude)
-    }
 }

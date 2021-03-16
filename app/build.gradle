@@ -14,7 +14,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
-        versionName "1.75"
+        versionName "1.76.experimental"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Read the API key from ./secure.properties into R.string.maps_api_key
@@ -22,8 +22,6 @@ android {
         if (file("../secure.properties").exists()) {
             file("../secure.properties")?.withInputStream { secureProps.load(it) }
         }
-        resValue "string", "maps_api_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
-        buildConfigField "String", "PLACES_API_KEY", (secureProps.getProperty("PLACES_API_KEY") ?: "\"\"")
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -102,10 +100,8 @@ dependencies {
     implementation 'com.opencsv:opencsv:4.6'
 
     implementation 'com.google.android.gms:play-services-location:17.0.0'
-    implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
 
     // for Google Places API
-    implementation(name:'places-maps-sdk-3.1.0-beta', ext:'aar')
     implementation 'com.google.android.gms:play-services-gcm:17.0.0'
     implementation 'com.google.auto.value:auto-value-annotations:1.6.2'
 

@@ -21,7 +21,4 @@ class FixedSessionConfirmationViewMvcImpl(
         return session?.indoor == false
     }
 
-    override fun updateLocation(latitude: Double?, longitude: Double?) {
-        // do nothing, static map
-    }
 }

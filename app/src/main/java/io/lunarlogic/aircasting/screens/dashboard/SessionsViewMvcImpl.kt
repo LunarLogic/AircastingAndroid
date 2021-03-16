@@ -157,11 +157,6 @@ abstract class SessionsViewMvcImpl<ListenerType>: BaseObservableViewMvc<Sessions
         }
     }
 
-    fun onMapButtonClicked(session: Session, measurementStream: MeasurementStream?) {
-        for (listener in listeners) {
-            listener.onMapButtonClicked(session, measurementStream?.sensorName)
-        }
-    }
 
     fun onGraphButtonClicked(session: Session, measurementStream: MeasurementStream?) {
         for (listener in listeners) {

@@ -75,9 +75,6 @@
             android:name=".screens.new_session.NewSessionActivity"
             android:screenOrientation="portrait" />
         <activity android:label=""
-            android:name=".screens.session_view.map.MapActivity"
-            android:screenOrientation="portrait" />
-        <activity android:label=""
             android:name="io.lunarlogic.aircasting.screens.session_view.graph.GraphActivity"
             android:screenOrientation="portrait" />
         <activity android:label=""
@@ -91,9 +88,6 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="${crashlyticsCollectionEnabled}" />
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/maps_api_key" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
