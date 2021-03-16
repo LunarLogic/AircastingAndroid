@@ -33,7 +33,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
 
     protected var mSessionPresenter: SessionPresenter? = null
 
-    private val mMeasurementsTableContainer: MeasurementsTableContainer
     protected var mStatisticsContainer: StatisticsContainer?
     private val mMoreButton: ImageView?
     private val mMoreInvisibleButton: Button?
@@ -51,14 +50,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
         mSessionDateTextView = this.rootView?.session_date
         mSessionNameTextView = this.rootView?.session_name
         mSessionMeasurementsDescription = this.findViewById(R.id.session_measurements_description)
-
-        mMeasurementsTableContainer = MeasurementsTableContainer(
-            context,
-            inflater,
-            this.rootView,
-            true,
-            true
-        )
 
         mStatisticsContainer = StatisticsContainer(this.rootView, context)
         mMoreButton = this.rootView?.more_button
@@ -94,7 +85,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
         bindSessionDetails()
         if (sessionPresenter?.selectedStream != null) showSlider()
 
-        mMeasurementsTableContainer.bindSession(mSessionPresenter, this::onMeasurementStreamChanged)
         bindStatisticsContainer()
         mHLUSlider.bindSensorThreshold(sessionPresenter?.selectedSensorThreshold())
 
@@ -144,7 +134,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
     }
 
     protected open fun onSensorThresholdChanged(sensorThreshold: SensorThreshold) {
-        mMeasurementsTableContainer.refresh()
         mStatisticsContainer?.refresh(mSessionPresenter)
 
         mListener?.onSensorThresholdChanged(sensorThreshold)
