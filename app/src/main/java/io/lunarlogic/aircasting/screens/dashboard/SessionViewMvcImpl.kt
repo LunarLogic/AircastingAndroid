@@ -23,7 +23,6 @@ import kotlinx.android.synthetic.main.expanded_session_view.view.*
 abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerType>,
     SessionViewMvc<ListenerType> {
     protected val mLayoutInflater: LayoutInflater
-    protected val mMeasurementsTableContainer: MeasurementsTableContainer
 
     protected val mSessionCardLayout: ViewGroup
 
@@ -66,13 +65,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         mInfoTextView = findViewById(R.id.session_info)
         mMeasurementsDescription = findViewById(R.id.session_measurements_description)
 
-        mMeasurementsTableContainer = MeasurementsTableContainer(
-            context,
-            inflater,
-            this.rootView,
-            false,
-            showMeasurementsTableValues()
-        )
 
         mChart = Chart(
             context,
@@ -143,7 +135,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         bindExpanded(sessionPresenter)
         bindSessionDetails()
         bindMeasurementsDescription(sessionPresenter)
-        bindMeasurementsTable()
         bindChartData()
         bindFollowButtons(sessionPresenter)
         bindMapButton(sessionPresenter)
@@ -188,9 +179,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         }
     }
 
-    protected open fun bindMeasurementsTable() {
-        mMeasurementsTableContainer.bindSession(mSessionPresenter, this::onMeasurementStreamChanged)
-    }
 
     private fun bindChartData() {
         if (!showChart()) return
@@ -214,9 +202,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
     protected open fun expandSessionCard() {
         setExpandCollapseButton()
         mExpandedSessionView.visibility = View.VISIBLE
-        if(showExpandedMeasurementsTableValues()){
-            mMeasurementsTableContainer.makeSelectable()
-        }
 
         if (showChart()) {
             mChartView?.visibility = View.VISIBLE
@@ -232,7 +217,6 @@ abstract class SessionViewMvcImpl<ListenerType>: BaseObservableViewMvc<ListenerT
         setExpandCollapseButton()
         mExpandedSessionView.visibility = View.GONE
 
-        mMeasurementsTableContainer.makeStatic(showMeasurementsTableValues())
         bindCollapsedMeasurementsDesctription()
 
         adjustSessionCardPadding()

@@ -45,16 +45,6 @@ class FollowingSessionViewMvcImpl:
         return null;
     }
 
-    override fun bindMeasurementsTable() {
-        val session = mSessionPresenter?.session
-        if (session == null || session.measurementsCount() > 0) {
-            hideNoMeasurementsInfo()
-            mMeasurementsTableContainer.bindSession(mSessionPresenter, this::onMeasurementStreamChanged)
-        } else {
-            showNoMeasurementsInfo()
-        }
-    }
-
     override fun bindCollapsedMeasurementsDesctription() {
         mMeasurementsDescription?.text = context.getString(R.string.session_last_min_measurements_description)
     }
