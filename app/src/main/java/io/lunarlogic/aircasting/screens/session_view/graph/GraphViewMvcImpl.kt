@@ -67,6 +67,5 @@ abstract class GraphViewMvcImpl: SessionDetailsViewMvcImpl {
 
     private fun onTimeSpanChanged(timeSpan: ClosedRange<Date>) {
         mSessionPresenter?.visibleTimeSpan = timeSpan
-        mStatisticsContainer?.refresh(mSessionPresenter)
     }
 }

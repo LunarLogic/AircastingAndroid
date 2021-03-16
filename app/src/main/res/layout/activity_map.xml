@@ -14,8 +14,7 @@
 
     <include layout="@layout/measurements_table" />
 
-    <include android:id="@+id/statistics_view" layout="@layout/session_details_statistics_view" />
-   
+
     <androidx.constraintlayout.widget.Guideline
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"

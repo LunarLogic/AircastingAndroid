@@ -34,7 +34,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
     protected var mSessionPresenter: SessionPresenter? = null
 
     private val mMeasurementsTableContainer: MeasurementsTableContainer
-    protected var mStatisticsContainer: StatisticsContainer?
     private val mMoreButton: ImageView?
     private val mMoreInvisibleButton: Button?
     private val mHLUSlider: HLUSlider
@@ -60,7 +59,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
             true
         )
 
-        mStatisticsContainer = StatisticsContainer(this.rootView, context)
         mMoreButton = this.rootView?.more_button
         mMoreInvisibleButton = this.rootView?.more_invisible_button
         mMoreButton?.setOnClickListener {
@@ -95,7 +93,6 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
         if (sessionPresenter?.selectedStream != null) showSlider()
 
         mMeasurementsTableContainer.bindSession(mSessionPresenter, this::onMeasurementStreamChanged)
-        bindStatisticsContainer()
         mHLUSlider.bindSensorThreshold(sessionPresenter?.selectedSensorThreshold())
 
         mSessionMeasurementsDescription?.visibility = View.VISIBLE
@@ -133,19 +130,13 @@ abstract class SessionDetailsViewMvcImpl: BaseObservableViewMvc<SessionDetailsVi
         mSessionMeasurementsDescription?.text = context.getString(R.string.parameters)
     }
 
-    protected open fun bindStatisticsContainer() {
-        mStatisticsContainer?.bindSession(mSessionPresenter)
-    }
-
     protected open fun onMeasurementStreamChanged(measurementStream: MeasurementStream) {
         mSessionPresenter?.selectedStream = measurementStream
-        mStatisticsContainer?.refresh(mSessionPresenter)
         mHLUSlider.refresh(mSessionPresenter?.selectedSensorThreshold())
     }
 
     protected open fun onSensorThresholdChanged(sensorThreshold: SensorThreshold) {
         mMeasurementsTableContainer.refresh()
-        mStatisticsContainer?.refresh(mSessionPresenter)
 
         mListener?.onSensorThresholdChanged(sensorThreshold)
     }
