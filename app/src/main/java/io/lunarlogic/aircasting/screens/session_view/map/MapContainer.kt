@@ -215,12 +215,12 @@ class MapContainer: OnMapReadyCallback {
             mMeasurementsLine = mMap?.addPolyline(mMeasurementsLineOptions)
         }
 
-        if (counter >= 10 && counter % 5 == 0) {
-            val newMeasurements = mMeasurementPoints.take(mMeasurementPoints.size - 4)
+        if (counter >= 120 && counter % 60 == 0) {
+            val newMeasurements = mMeasurementPoints.take(mMeasurementPoints.size - 59)
             mMeasurementPoints.clear()
             mMeasurementPoints.addAll(newMeasurements)
 
-            val newSpans = mMeasurementSpans.take(mMeasurementSpans.size - 4)
+            val newSpans = mMeasurementSpans.take(mMeasurementSpans.size - 59)
             mMeasurementSpans.clear()
             mMeasurementSpans.addAll(newSpans)
 
