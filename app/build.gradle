@@ -104,9 +104,14 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
 
+    // Utilities for Maps SDK for Android (requires Google Play Services)
+    implementation 'com.google.maps.android:android-maps-utils:2.2.0'
+    implementation "com.google.android.gms:play-services-maps:17.0.0"
+
     // for Google Places API
     implementation(name:'places-maps-sdk-3.1.0-beta', ext:'aar')
     implementation 'com.google.android.gms:play-services-gcm:17.0.0'
+
     implementation 'com.google.auto.value:auto-value-annotations:1.6.2'
 
     // for Firebase Crashlytics and Test Lab
