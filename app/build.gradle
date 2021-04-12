@@ -14,7 +14,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
-        versionName "1.86"
+        versionName "1.95.experimental"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Read the API key from ./secure.properties into R.string.maps_api_key
@@ -105,7 +105,7 @@ dependencies {
     implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
 
     // Utilities for Maps SDK for Android (requires Google Play Services)
-    implementation 'com.google.maps.android:android-maps-utils:2.2.0'
+    implementation 'com.google.maps.android:android-maps-utils-v3:2.2.2'
     implementation "com.google.android.gms:play-services-maps:17.0.0"
 
     // for Google Places API

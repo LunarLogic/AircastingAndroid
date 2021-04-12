@@ -45,7 +45,8 @@ class MapContainer: OnMapReadyCallback {
     private var mLastMeasurementMarker: Marker? = null
 
     private var mHeatmapLocations: MutableList<WeightedLatLng> = mutableListOf()
-    private var mProvider: HeatmapTileProvider? = null
+    private var mOverlay: TileOverlay? = null
+
 
 
     private val status = AtomicInteger(Status.INIT.value)
@@ -95,7 +96,6 @@ class MapContainer: OnMapReadyCallback {
         mMap?.isBuildingsEnabled = false
 
         drawSession()
-        setupHeatMap()
         animateCameraToSession()
         showMap()
     }
@@ -129,16 +129,29 @@ class MapContainer: OnMapReadyCallback {
         var i = 0
         for (measurement in mMeasurements) {
             latestColor = MeasurementColor.forMap(mContext, measurement, mSessionPresenter?.selectedSensorThreshold())
-
-//            if (i > 0) {
-//                mMeasurementSpans.add(StyleSpan(latestColor))
-//            }
             latestPoint = LatLng(measurement.latitude!!, measurement.longitude!!)
             mMeasurementPoints.add(latestPoint)
+            mSessionPresenter?.selectedSensorThreshold()?.let { sensorThreshold ->
+                mHeatmapLocations?.add(
+                    WeightedLatLng(latestPoint,
+                        measurement.getLevel(sensorThreshold).value.toDouble() + 1
+                    )
+                )
+            }
+
             i += 1
         }
         mMeasurementsLineOptions.addAll(mMeasurementPoints)//.addAllSpans(mMeasurementSpans)
         mMeasurementsLine = mMap?.addPolyline(mMeasurementsLineOptions)
+
+        // Heatmap
+        val heatmapTileProvider = HeatmapTileProvider.Builder()
+            .weightedData(mHeatmapLocations)
+            .build()
+        if (mOverlay != null) {
+            mOverlay?.remove()
+        }
+        mOverlay = mMap?.addTileOverlay(TileOverlayOptions().tileProvider(heatmapTileProvider))
 
         if (latestPoint != null && latestColor != null) {
             drawLastMeasurementMarker(latestPoint, latestColor)
@@ -211,6 +224,7 @@ class MapContainer: OnMapReadyCallback {
         if (colorPoint == null) return
 
         mMeasurementPoints.add(colorPoint.point)
+        mHeatmapLocations.add(WeightedLatLng(colorPoint.point, colorPoint.level ?: 0.0))
 //        mMeasurementSpans.add(StyleSpan(colorPoint.color))
 
         if (mMeasurementsLine == null) {
@@ -227,8 +241,14 @@ class MapContainer: OnMapReadyCallback {
 
         val point = LatLng(measurement.latitude, measurement.longitude)
         val color = MeasurementColor.forMap(mContext, measurement, mSessionPresenter?.selectedSensorThreshold())
+        val sensorThreshold = mSessionPresenter?.selectedSensorThreshold()
+        val level = if (sensorThreshold != null) {
+            measurement.getLevel(sensorThreshold).value.toDouble() + 1
+        } else {
+            null
+        }
 
-        return ColorPoint(point, color)
+        return ColorPoint(point, color, level)
     }
 
     fun refresh(sessionPresenter: SessionPresenter?) {
@@ -262,42 +282,6 @@ class MapContainer: OnMapReadyCallback {
         mLocateButton?.visibility = View.VISIBLE
     }
 
-    private fun setupHeatMap() {
-        if (mMeasurements.isEmpty()) return
-//        var latLngs: MutableList<WeightedLatLng?>? = null
-        val t = mSessionPresenter?.selectedSensorThreshold()
-        println("MARYSIA: treshold ${t}")
-        if (t == null) return
-        mMeasurements.forEach { m ->
-            if (m.latitude == null ||  m.longitude ==null ||  t == null) {
-                null
-            } else {
-                mHeatmapLocations?.add(
-                    WeightedLatLng(
-                        com.google.android.gms.maps.model.LatLng(
-                            m.latitude,
-                            m.longitude
-                        ),
-                        m.getLevel(t).value.toDouble()
-                    )
-                )
-            }
-        }
-        println("MARYSIA: latlngs ${mHeatmapLocations?.size}")
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        mProvider = HeatmapTileProvider.Builder()
-            .weightedData(mHeatmapLocations)
-            .build()!!
-
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        mMap?.let {map ->
-            mProvider?.let { provider ->
-                map.addTileOverlay(TileOverlayOptions().tileProvider(provider))
-            }
-
-        }
-    }
 }
 
-data class ColorPoint(val point: LatLng, val color: Int)
+data class ColorPoint(val point: LatLng, val color: Int, val level: Double? = null)
