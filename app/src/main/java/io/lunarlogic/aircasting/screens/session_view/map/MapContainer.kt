@@ -44,8 +44,12 @@ class MapContainer: OnMapReadyCallback {
     private var mMeasurementsLineOptions: PolylineOptions = defaultPolylineOptions()
     private var mMeasurementsLine: Polyline? = null
     private val mMeasurementPoints = ArrayList<LatLng>()
-    private val mMeasurementSpans = ArrayList<StyleSpan>()
+//    private val mMeasurementSpans = ArrayList<StyleSpan>()
     private var mLastMeasurementMarker: Marker? = null
+
+    private var mTileOverlay: TileOverlay? = null
+    private var mOldTileOverlay: TileOverlay? = null
+    private var mTileColorSwitch: Boolean = true
 
     private val status = AtomicInteger(Status.INIT.value)
 
@@ -130,20 +134,23 @@ class MapContainer: OnMapReadyCallback {
             latestColor = MeasurementColor.forMap(mContext, measurement, mSessionPresenter?.selectedSensorThreshold())
 
             if (i > 0) {
-                mMeasurementSpans.add(StyleSpan(latestColor))
+//                mMeasurementSpans.add(StyleSpan(latestColor))
             }
             latestPoint = LatLng(measurement.latitude!!, measurement.longitude!!)
             mMeasurementPoints.add(latestPoint)
             i += 1
         }
-        mMeasurementsLineOptions.addAll(mMeasurementPoints).addAllSpans(mMeasurementSpans)
+        mMeasurementsLineOptions.addAll(mMeasurementPoints)//.addAllSpans(mMeasurementSpans)
         mMeasurementsLine = mMap?.addPolyline(mMeasurementsLineOptions)
 
         if (latestPoint != null && latestColor != null) {
             drawLastMeasurementMarker(latestPoint, latestColor)
         }
 
-        val tileOverlay = mMap?.addTileOverlay(
+        if (mTileOverlay != null) {
+            mTileOverlay?.remove()
+        }
+        mTileOverlay = mMap?.addTileOverlay(
             TileOverlayOptions()
                 .tileProvider(getTileProvider()).visible(true)
         )
@@ -215,14 +222,26 @@ class MapContainer: OnMapReadyCallback {
         if (colorPoint == null) return
 
         mMeasurementPoints.add(colorPoint.point)
-        mMeasurementSpans.add(StyleSpan(colorPoint.color))
+//        mMeasurementSpans.add(StyleSpan(colorPoint.color))
 
         if (mMeasurementsLine == null) {
             mMeasurementsLine = mMap?.addPolyline(mMeasurementsLineOptions)
         }
 
         mMeasurementsLine?.setPoints(mMeasurementPoints)
-        mMeasurementsLine?.setSpans(mMeasurementSpans)
+//        mMeasurementsLine?.setSpans(mMeasurementSpans)
+        println("MARYSIA: Adding invisible overlay")
+
+        // Adding "invisible" overlay
+        val newTileOverlay =  mMap?.addTileOverlay(
+            TileOverlayOptions()
+                .tileProvider(getTileProvider()).transparency(1f).visible(true)
+        )
+
+        mTileOverlay?.transparency = 0.5f // making previous overlay visible
+        mOldTileOverlay?.remove() // removing previously displayed visible overlay
+        mOldTileOverlay = mTileOverlay
+        mTileOverlay = newTileOverlay
 
         drawLastMeasurementMarker(colorPoint.point, colorPoint.color)
     }
@@ -249,7 +268,7 @@ class MapContainer: OnMapReadyCallback {
     private fun clearMap() {
         mMap?.clear()
         mMeasurementPoints.clear()
-        mMeasurementSpans.clear()
+//        mMeasurementSpans.clear()
         mMeasurementsLine = null
         mMeasurementsLineOptions = defaultPolylineOptions()
     }
@@ -269,12 +288,21 @@ class MapContainer: OnMapReadyCallback {
 
     //TILES
     private fun getTileProvider(): TileProvider {
-        var tileProvider: TileProvider = object : UrlTileProvider(256, 256) {
+        var tileProvider: TileProvider = object : UrlTileProvider(128, 128) {
 
             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
                 println("MARYSIA: tile ${x}x${y}")
                 /* Define the URL pattern for the tile images */
-                val url = "https://www.iconsdb.com/icons/preview/green/square-xxl.png"
+                var url = ""
+                if (mTileColorSwitch) {
+                    mTileColorSwitch = false
+                      url = "https://www.linkpicture.com/q/square-xl.png"
+
+                } else {
+                    mTileColorSwitch = true
+                    url = "https://www.linkpicture.com/q/green_1.png"
+                }
+
                 return if (!checkTileExists(x, y, zoom)) {
                     null
                 } else try {
