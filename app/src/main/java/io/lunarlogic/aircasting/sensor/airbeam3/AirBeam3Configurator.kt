@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import io.lunarlogic.aircasting.exceptions.AirBeam3ConfiguringFailed
 import io.lunarlogic.aircasting.exceptions.ErrorHandler
+import io.lunarlogic.aircasting.lib.AuthenticationHelper
 import io.lunarlogic.aircasting.lib.DateConverter
 import io.lunarlogic.aircasting.lib.Settings
 import io.lunarlogic.aircasting.models.Session
@@ -52,6 +53,8 @@ class AirBeam3Configurator(
     val airBeam3Reader = AirBeam3Reader(mErrorHandler)
     val sdCardReader =
         SDCardReader()
+
+    private val authenticationHelper = AuthenticationHelper(mContext) // todo: this one is a bit yolo, maybe i should inject this one everywhere <?>
 
     fun sendAuth(uuid: String) {
         configurationCharacteristic?.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
@@ -259,7 +262,7 @@ class AirBeam3Configurator(
     }
 
     private fun authRequest(): WriteRequest {
-        return writeCharacteristic(configurationCharacteristic, hexMessagesBuilder.authTokenMessage(mSettings.getAuthToken()!!))
+        return writeCharacteristic(configurationCharacteristic, hexMessagesBuilder.authTokenMessage(authenticationHelper.getAuthToken()!!))
             .fail { _, status -> mErrorHandler.handle(AirBeam3ConfiguringFailed("token", status)) }
     }
 

@@ -1,5 +1,6 @@
 package io.lunarlogic.aircasting.screens.new_session
 
+import android.accounts.AccountManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -22,7 +23,7 @@ class  LoginController(
 ) : LoginViewMvc.Listener,
     LoginViewMvc.ForgotPasswordDialogListener {
     private val mErrorHandler = ErrorHandler(mContextActivity)
-    private val mLoginService = LoginService(mSettings, mErrorHandler, mApiServiceFactory)
+    private val mLoginService = LoginService(mSettings, mErrorHandler, mApiServiceFactory, mContextActivity)
     private val mForgotPasswordService = ForgotPasswordService(mContextActivity, mErrorHandler, mApiServiceFactory)
 
     fun onStart() {

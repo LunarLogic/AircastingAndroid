@@ -14,10 +14,7 @@ import io.lunarlogic.aircasting.events.sdcard.SDCardSyncErrorEvent
 import io.lunarlogic.aircasting.events.sessions_sync.SessionsSyncErrorEvent
 import io.lunarlogic.aircasting.events.sessions_sync.SessionsSyncSuccessEvent
 import io.lunarlogic.aircasting.exceptions.ErrorHandler
-import io.lunarlogic.aircasting.lib.ResultCodes
-import io.lunarlogic.aircasting.lib.Settings
-import io.lunarlogic.aircasting.lib.areLocationServicesOn
-import io.lunarlogic.aircasting.lib.safeRegister
+import io.lunarlogic.aircasting.lib.*
 import io.lunarlogic.aircasting.location.LocationHelper
 import io.lunarlogic.aircasting.networking.services.ApiServiceFactory
 import io.lunarlogic.aircasting.networking.services.SessionsSyncService
@@ -54,7 +51,8 @@ class SyncController(
     TurnOffLocationServicesViewMvc.Listener,
     ErrorViewMvc.Listener {
 
-    private val mApiService =  mApiServiceFactory.get(mSettings.getAuthToken()!!)
+    private val authenticationHelper = AuthenticationHelper(mContextActivity) // todo: this one is a bit yolo, maybe i should inject this one everywhere <?>
+    private val mApiService =  mApiServiceFactory.get(authenticationHelper.getAuthToken()!!)
     private val mSessionsSyncService = SessionsSyncService.get(mApiService, mErrorHandler, mSettings)
     private val mWizardNavigator = SyncWizardNavigator(mContextActivity, mSettings, mViewMvc, mFragmentManager)
 

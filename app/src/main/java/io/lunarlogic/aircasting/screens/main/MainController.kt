@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import io.lunarlogic.aircasting.events.DisconnectExternalSensorsEvent
 import io.lunarlogic.aircasting.events.LocationPermissionsResultEvent
 import io.lunarlogic.aircasting.exceptions.ErrorHandler
+import io.lunarlogic.aircasting.lib.AuthenticationHelper
 import io.lunarlogic.aircasting.lib.ResultCodes
 import io.lunarlogic.aircasting.lib.Settings
 import io.lunarlogic.aircasting.networking.services.ApiService
@@ -25,11 +26,12 @@ class MainController(
     private var mSessionManager: SessionManager? = null
     private var mConnectivityManager: ConnectivityManager? = null
     private val mErrorHandler = ErrorHandler(rootActivity)
+    private val authenticationHelper = AuthenticationHelper(rootActivity) // todo: this one is a bit yolo, maybe i should inject this one everywhere <?>
 
     fun onCreate() {
-        if (!mSettings.onboardingDisplayed() && mSettings.getAuthToken() == null) {
+        if (!mSettings.onboardingDisplayed() && authenticationHelper.getAuthToken() == null) {
             showOnboardingScreen()
-        } else if (mSettings.getAuthToken() == null) {
+        } else if (authenticationHelper.getAuthToken() == null) {
             showLoginScreen()
         } else {
             setupDashboard()
@@ -55,9 +57,9 @@ class MainController(
     }
 
     private fun setupDashboard() {
-        mErrorHandler.registerUser(mSettings.getEmail())
+        mErrorHandler.registerUser(authenticationHelper.getEmail())
 
-        val apiService =  mApiServiceFactory.get(mSettings.getAuthToken()!!)
+        val apiService =  mApiServiceFactory.get(authenticationHelper.getAuthToken()!!)
         mSessionManager = SessionManager(rootActivity, apiService, mSettings)
 
         mConnectivityManager = ConnectivityManager(apiService, rootActivity, mSettings)
