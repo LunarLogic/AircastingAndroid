@@ -15,7 +15,7 @@ import kotlin.concurrent.timerTask
 abstract class AirBeamConnector {
     interface Listener {
         fun onConnectionSuccessful(deviceItem: DeviceItem, sessionUUID: String?)
-        fun onConnectionFailed(deviceId: String)
+        fun onConnectionFailed(deviceItem: DeviceItem)
         fun onDisconnect(deviceId: String)
     }
 
@@ -26,6 +26,10 @@ abstract class AirBeamConnector {
     protected val cancelStarted = AtomicBoolean(false)
     protected val connectionEstablished = AtomicBoolean(false)
     protected val connectionTimedOut = AtomicBoolean(false)
+
+//    private var reconnectionTriesNumber: Int? = null
+//    protected val reconnectionStarted = AtomicBoolean(false)
+//    private val RECONNECTION_TRIES_MAX = 5
 
     protected var mDeviceItem: DeviceItem? = null
     protected var mSessionUUID: String? = null
@@ -63,7 +67,7 @@ abstract class AirBeamConnector {
         mTimerTask = timerTask {
             if (connectionEstablished.get() == false) {
                 connectionTimedOut.set(true)
-                mListener?.onConnectionFailed(deviceItem.id)
+                mListener?.onConnectionFailed(deviceItem)
             }
         }
         Timer().schedule(mTimerTask, CONNECTION_TIMEOUT)
@@ -90,15 +94,15 @@ abstract class AirBeamConnector {
         mListener?.onConnectionSuccessful(deviceItem, mSessionUUID)
     }
 
-    fun onConnectionFailed(deviceId: String) {
+    fun onConnectionFailed(deviceItem: DeviceItem) {
         mTimerTask?.cancel()
         if (connectionTimedOut.get() == false) {
-            mListener?.onConnectionFailed(deviceId)
+            mListener?.onConnectionFailed(deviceItem)
         }
     }
 
     fun onDisconnected(deviceId: String) {
-        EventBus.getDefault().post(SensorDisconnectedEvent(deviceId))
+        EventBus.getDefault().post(SensorDisconnectedEvent(deviceId, mSessionUUID))
         mListener?.onDisconnect(deviceId)
     }
 
